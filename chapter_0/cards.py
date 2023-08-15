@@ -28,6 +28,38 @@ for n in range(5):
     
 
 # %%
+deck = set()
+for suit in suits:
+    for card in faces + numbered:
+        deck.add(f"{card} of {suit}")
+
+# %%
+len(deck)
+
+# %%
+print(deck)
+
+# %%
+print(sorted(deck))
+
+# %%
+print(dir(deck))
+
+# %%
+help(deck.remove)
+
+# %%
+card = random.choice(list(deck))
+print(card)
+
+# %%
+deck.remove(card)
+len(deck)
+
+# %%
+type(card)
+
+# %%
 
 
 
