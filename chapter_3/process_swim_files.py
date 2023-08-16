@@ -1,3 +1,9 @@
-from swimclub import get_swim_data
+from swimclub import get_swim_data, folder
+import os
 
-print(get_swim_data("Darius-13-100m-Fly.txt"))
+swim_files = os.listdir(folder)
+swim_files.remove(".DS_Store")
+
+for n, s in enumerate(swim_files, 1):
+    print(n, "Processing: " + s)
+    get_swim_data(s)
