@@ -19,7 +19,7 @@ def get_swim_data(fn):
             seconds, hundredths = t.split(".")
         converts.append(int(minutes)*60*100 + int(seconds)*100 + int(hundredths))
     average = statistics.mean(converts)
-    min_secs, min_hund = str(round(average / 100, 2)).split(".")
+    min_secs, min_hund = f"{(average / 100):.2f}".split(".")
     min_secs = int(min_secs)
     minutes = min_secs // 60
     seconds = min_secs % 60
