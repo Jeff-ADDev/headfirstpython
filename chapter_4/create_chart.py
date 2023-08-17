@@ -39,14 +39,6 @@ def produce_bar_chart(fn):
     save_to=f"{folder + charts}{fn.removesuffix('.txt')}.html"
 #    with open(save_to, "w") as sf:
 #        print(page, file=sf)
-    print(f"------ {save_to} -------")
     with open(save_to, "w") as file:
         file.write(page)
     return save_to
-
-import create_chart
-import webbrowser
-
-chart = produce_bar_chart("Darius-13-100m-Fly.txt")
-
-webbrowser.open("file://" + os.path.realpath(chart))
