@@ -12,3 +12,5 @@ for file in swim_files:
         swimmers.append(name)
 
 print(sorted(swimmers))
+
+
