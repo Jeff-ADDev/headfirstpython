@@ -19,14 +19,17 @@ class FrenchDeck:
         print(f"Type: {self._cards[position]}")
         return self._cards[position]    
 
+    # Get a random card from the deck but it is not removed
     def get_random_card(self):
         return random.choice(self._cards)
     
+    # Take a random card out of the deck
     def take_random_card(self):
         card = random.choice(self._cards)
         self._cards.remove(card)
         return card
     
+    # Given two cards, determine their value compared to the other 168 combos
     def holdem_start_hand_strength(self, card_1, card_2):
         # Hand is paired
         if card_1.rank == card_2.rank:
@@ -51,7 +54,7 @@ class FrenchDeck:
                     rank=50, paired=False, suited=False, 
                     combos=12, combo_percent=.90, win_percent=22)
              
-
+    # Given two cards, we always want the highest card value first
     def highest_ranks(self, card_1, card_2):
         ranks = {'2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, 'T': 10, 'J': 11, 'Q': 12, 'K': 13, 'A': 14}
         rank_1 = ranks[card_1.rank]

@@ -2,6 +2,9 @@ import collections
 
 holdem_player_hand = collections.namedtuple('HPCards', ['rank', 'paired', 'suited', 'combos', 'combo_percent', 'win_percent'])
 
+def xvalues(rank):
+    return 0
+
 def suitedvalues(stringrank):
     hmh = holdem_player_hand(
             rank=0, paired=False, suited=True, 
@@ -9,330 +12,335 @@ def suitedvalues(stringrank):
     if stringrank == 'AK':
         hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'AQ':
-        return 2
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'AJ':
-        return 3
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'AT':
-        return 4
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'A9':
-        return 5
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'A8':
-        return 6
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'A7':
-        return 7
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'A6':
-        return 8
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'A5':
-        return 9
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'A4':
-        return 10
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'A3':
-        return 11
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'A2':
-        return 12
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'KQ':
-        return 13
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'KJ':
-        return 14
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'KT':
-        return 15
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'K9':
-        return 16
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'K8':
-        return 17
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'K7':
-        return 18
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'K6':
-        return 19
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'K5':
-        return 20
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'K4':
-        return 21
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'K3':
-        return 22
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'K2':
-        return 23
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'QJ':
-        return 24
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'QT':
-        return 25
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'Q9':
-        return 26
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'Q8':
-        return 27
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'Q7':
-        return 28
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'Q6':
-        return 29
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'Q5':
-        return 30
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'Q4':
-        return 31
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'Q3':
-        return 32
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'Q2':
-        return 33
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'JT':
-        return 34
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'J9':
-        return 35
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'J8':
-        return 36
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'J7':
-        return 37
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'J6':
-        return 38
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'J5':
-        return 39
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'J4':
-        return 40
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'J3':
-        return 41
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'J2':
-        return 42
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'T9':
-        return 43
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'T8':
-        return 44
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'T7':
-        return 45
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'T6':
-        return 46
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'T5':
-        return 47
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'T4':
-        return 48
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'T3':
-        return 49
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'T2':
-        return 50
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '98':
-        return 51
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '97':
-        return 52
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '96':
-        return 53
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '95':
-        return 54
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '94':
-        return 55
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '93':
-        return 56
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '92':
-        return 57
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '87':
-        return 58
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '86':
-        return 59
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '85':
-        return 60
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '84':
-        return 61
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '83':
-        return 62
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '82':
-        return 63
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '76':
-        return 64
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '75':
-        return 65
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '74':
-        return 66
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '73':
-        return 67
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '72':
-        return 68
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '65':
-        return 69
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '64':
-        return 70
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '63':
-        return 71
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '62':
-        return 72
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '54':
-        return 73
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '53':
-        return 74
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '52':
-        return 75
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '43':
-        return 76
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '42':
-        return 77
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '32':
-        return 78
+        hmh = hmh._replace(rank=1, win_percent=22)
     else:
-        return 0
+        hmh = hmh._replace(rank=200, win_percent=3)
     return hmh
 
 def unsuitedvalues(stringrank):
+    hmh = holdem_player_hand(
+        rank=0, paired=False, suited=False, 
+        combos=12, combo_percent=.90, win_percent=0)
     if stringrank == 'AK':
-        return 101
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'AQ':
-        return 102
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'AJ':
-        return 103
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'AT':
-        return 104
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'A9':
-        return 105
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'A8':
-        return 106
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'A7':
-        return 107
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'A6':
-        return 108
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'A5':
-        return 109
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'A4':
-        return 110
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'A3':
-        return 111
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'A2':
-        return 112
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'KQ':
-        return 113
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'KJ':
-        return 114
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'KT':
-        return 115
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'K9':
-        return 116
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'K8':
-        return 117
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'K7':
-        return 118
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'K6':
-        return 119
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'K5':
-        return 120
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'K4':
-        return 121
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'K3':
-        return 122
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'K2':
-        return 123
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'QJ':
-        return 124
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'QT':
-        return 125
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'Q9':
-        return 126
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'Q8':
-        return 127
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'Q7':
-        return 128
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'Q6':
-        return 129
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'Q5':
-        return 130
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'Q4':
-        return 131
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'Q3':
-        return 132
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'Q2':
-        return 133
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'JT':
-        return 134
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'J9':
-        return 135
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'J8':
-        return 136
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'J7':
-        return 137
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'J6':
-        return 138
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'J5':
-        return 139
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'J4':
-        return 140
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'J3':
-        return 141
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'J2':
-        return 142
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'T9':
-        return 143
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'T8':
-        return 144
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'T7':
-        return 145
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'T6':
-        return 146
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'T5':
-        return 147
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'T4':
-        return 148
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'T3':
-        return 149
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'T2':
-        return 150
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '98':
-        return 151
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '97':
-        return 152
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '96':
-        return 153
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '95':
-        return 154
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '94':
-        return 155
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '93':
-        return 156
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '92':
-        return 157
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '87':
-        return 158
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '86':
-        return 159
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '85':
-        return 160
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '84':
-        return 161
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '83':
-        return 162
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '82':
-        return 163
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '76':
-        return 164
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '75':
-        return 165
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '74':
-        return 166
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '73':
-        return 167
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '72':
-        return 168
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '65':
-        return 169
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '64':
-        return 170
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '63':
-        return 171
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '62':
-        return 172
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '54':
-        return 173
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '53':
-        return 174
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '52':
-        return 175
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '43':
-        return 176
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '42':
-        return 177
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == '32':
-        return 178
+        hmh = hmh._replace(rank=1, win_percent=22)
     else:
-        return 0
+        hmh = hmh._replace(rank=200, win_percent=3)
+    return hmh
     
 def pairedvalues(stringrank):
     hmh = holdem_player_hand(
-            paired=True, suited=False, 
-            combos=6, combo_percent=.45)
+            rank=0, paired=False, suited=True, 
+            combos=4, combo_percent=.30, win_percent=0)
     if stringrank == 'AA':
-        return hmh(rank=1, win_percent=22)
+        hmh = hmh._replace(rank=1, win_percent=22)
     elif stringrank == 'KK':
-        return hmh(rank=2, win_percent=22)
+        hmh = hmh._replace(rank=1, win_percent=22)
     else:
-        return 0
+        hmh = hmh._replace(rank=200, win_percent=3)
+    return hmh
