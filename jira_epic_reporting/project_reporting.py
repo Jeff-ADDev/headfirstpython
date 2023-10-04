@@ -20,16 +20,35 @@ if response.status_code == 200:
     print(Fore.GREEN + "Success! - Epic Item" + Style.RESET_ALL)
     data = response.json()
     for issue in data["issues"]:
-        print(data["issues"][0]["fields"]["summary"])
+        print(issue["fields"]["summary"])
 else:
     print(Fore.RED + "Failed!")
 
-epic_issues = main_serach + "'Epic Link'='ARR-2392'"
+epic_issues = main_serach + "'Epic Link'='ARR-2392' and STATUS != Cancelled"
 response = requests.get(epic_issues, headers=header)
 if response.status_code == 200:
     print(Fore.GREEN + "Success! - Epic Issues" + Style.RESET_ALL)
     data = response.json()
     for issue in data["issues"]:
-        print(Fore.YELLOW + issue["fields"]["summary"] + Style.RESET_ALL)
+        print(Fore.YELLOW + Style.BRIGHT 
+              + issue["key"] + " - "
+              + issue["fields"]["summary"] + Style.RESET_ALL)
+        
+        try:
+            for item in issue["fields"]["customfield_10010"]:
+                cf_10010_name = item["name"]
+                cf_10010_state = item["state"]
+        except:
+                cf_10010_name = ""
+                cf_10010_state = ""
+        
+        print(Fore.LIGHTYELLOW_EX + Style.DIM
+              + issue["fields"]["issuetype"]["name"] 
+              + " : " + str(issue["fields"]["customfield_10032"])
+              + " : " + issue["fields"]["project"]["name"] 
+              + " : " + cf_10010_name
+              + " : " + cf_10010_state
+              + Style.RESET_ALL)
+
 else:
     print(Fore.RED + "Failed!")
