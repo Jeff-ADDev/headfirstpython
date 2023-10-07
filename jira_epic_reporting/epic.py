@@ -4,7 +4,9 @@ from colorama import init, Fore, Back, Style
 from datetime import datetime
 from openpyxl import load_workbook
 from openpyxl.worksheet.table import Table, TableStyleInfo
+from openpyxl.styles import numbers
 from openpyxl.styles import Alignment
+from openpyxl.styles import Font
 from openpyxl.utils import get_column_letter
 
 class Epic:
@@ -61,8 +63,7 @@ class Epic:
               "\n    " + Fore.YELLOW + Style.NORMAL + f"{self.issues_with_points} issues have points and {self.issues_with_no_points} don't. {self.issues_points} points total." +
               "\n    " + Fore.MAGENTA + " Sub Labels: " + Fore.WHITE + str(self.sub_labels) + Style.RESET_ALL)
         
-
-    def excel_worksheet_create(ws, epics, jira_issue_link, project_figma_link):
+    def excel_worksheet_create(ws, epics, jira_issue_link, project_figma_link, project_label):
         ws.column_dimensions["A"].width = 16
         ws.column_dimensions["B"].width = 50
         ws.column_dimensions["C"].width = 30
@@ -80,7 +81,15 @@ class Epic:
         # Populate data
         ws.append(["Epic", "Summary", "Team", "Estimate", "Issues w Points", "Issues w No Points ", "Issues Total Points", "Sub Labels"])
         for epicitem in epics:
-            sub_labels = epicitem.get_sublevles()
+            sub_labels = ""
+            coun_label = 0
+            for label in epicitem.sub_labels:
+                if label != project_label:
+                    if coun_label == 0:
+                        sub_labels += label
+                        coun_label += 1
+                    else:
+                        sub_labels += ", " + label
             ws.append([epicitem.key, epicitem.summary, epicitem.team, epicitem.estimate, epicitem.issues_with_points, epicitem.issues_with_no_points, epicitem.issues_points, sub_labels])    
 
         ws.add_table(table)
@@ -126,3 +135,145 @@ class Epic:
         ws["A" + str(len(epics) + 3)].hyperlink = project_figma_link
         ws["A" + str(len(epics) + 3)].value = "Figma Plan"
         ws["A" + str(len(epics) + 3)].style = "Hyperlink"
+
+    def excel_worksheet_summary(ws, epics, project_label, project_created):
+        def test_zero_value(value, cell):
+            if value == 0:
+                cell.value = " - "
+            else:
+                cell.value = value
+
+        sub_labels = []
+
+        ws.column_dimensions["A"].width = 20
+        ws.column_dimensions["B"].width = 15
+        ws.column_dimensions["C"].width = 20
+        ws.column_dimensions["D"].width = 15
+        ws.column_dimensions["E"].width = 25
+
+        epic_total = 0
+        epic_estimate_total = 0
+        epic_with_estimate = 0
+        epic_estimate_max = 0
+        epic_estimate_min = 0
+        epic_estimate_avg = 0
+        epic_percent_with_estimate = 0
+        issue_total = 0
+        issue_estimate_total = 0
+        issue_with_estimate = 0
+        issue_estimate_max = 0
+        issue_estimate_min = 0
+        issue_estimate_avg = 0
+        issue_percent_with_estimate = 0
+
+        for epicitem in epics:
+            # List of all sub labels
+            for label in epicitem.sub_labels:
+                if label not in sub_labels:
+                    if label != project_label:
+                        sub_labels.append(label)
+            # Epic Summary Data 
+            epic_total += 1
+            if epicitem.estimate != None:
+                epic_with_estimate += 1
+                epic_estimate_total += epicitem.estimate
+                if epicitem.estimate > epic_estimate_max:
+                    epic_estimate_max = epicitem.estimate
+                if epicitem.estimate < epic_estimate_min:
+                    epic_estimate_min = epicitem.estimate
+            for issueitem in epicitem.issues:
+                issue_total += 1
+                if issueitem.size != None:
+                    issue_with_estimate += 1
+                    issue_estimate_total += issueitem.size
+                    if issueitem.size > issue_estimate_max:
+                        issue_estimate_max = issueitem.size
+                    if issueitem.size < issue_estimate_min:
+                        issue_estimate_min = issueitem.size
+        if epic_estimate_total > 0:
+            epic_estimate_avg = epic_estimate_total / epic_with_estimate
+        else:
+            epic_estimate_avg = 0
+        
+        if epic_with_estimate > 0:
+            epic_percent_with_estimate = epic_with_estimate / epic_total
+        else:
+            epic_percent_with_estimate = 0
+
+        if issue_estimate_total > 0:
+            issue_estimate_avg = issue_estimate_total / issue_with_estimate
+        else:
+            issue_estimate_avg = 0
+        
+        if issue_with_estimate > 0:
+            issue_percent_with_estimate = issue_with_estimate / issue_total
+        else:
+            issue_percent_with_estimate = 0
+
+        ws["E3"] = "Project Label"
+        ws["E3"].font = Font(bold=True, size=14)
+        ws["E4"] = project_label
+        ws["E4"].font = Font(italic=True, size=12)
+        ws["A1"] = "Created"
+        ws["A1"].font = Font(bold=True, size=14)
+        ws["B1"] = project_created
+        ws["B1"].font = Font(italic=True, size=12)
+
+        ws["A3"] = "Epics"
+        ws["A3"].font = Font(bold=True, size=14)
+        ws["C3"] = "All Issues"
+        ws["C3"].font = Font(bold=True, size=14)
+
+        ws["A4"] = "Count"
+        ws["A5"] = "Total Estimate"
+        ws["A6"] = "With Estimates"
+        ws["A7"] = "Percent with Est"
+        ws["A8"] = "Average Estimate"
+        ws["A9"] = "Max Estimate"
+        ws["A10"] = "Min Estimate"
+
+        test_zero_value(epic_total, ws["B4"])
+        test_zero_value(epic_estimate_total, ws["B5"])
+        test_zero_value(epic_with_estimate, ws["B6"])
+        test_zero_value(epic_percent_with_estimate, ws["B7"])
+        ws["B7"].number_format = numbers.FORMAT_PERCENTAGE_00
+        test_zero_value(epic_estimate_avg, ws["B8"])
+        test_zero_value(epic_estimate_max, ws["B9"])
+        test_zero_value(epic_estimate_min, ws["B10"])
+        
+        for row in ws[4:ws.max_row]:  # 1 Based Index
+            cell = row[1] # zeor based index
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+
+        ws["C4"] = "Count"
+        ws["C5"] = "Total Estimate"
+        ws["C6"] = "With Estimates"
+        ws["C7"] = "Percent with Est"
+        ws["C8"] = "Average Estimate"
+        ws["C9"] = "Max Estimate"
+        ws["C10"] = "Min Estimate"
+
+        test_zero_value(issue_total, ws["D4"])
+        test_zero_value(issue_estimate_total, ws["D5"])
+        test_zero_value(issue_with_estimate, ws["D6"])
+        test_zero_value(issue_percent_with_estimate, ws["D7"])
+        ws["D7"].number_format = numbers.FORMAT_PERCENTAGE_00
+        test_zero_value(issue_estimate_avg, ws["D8"])
+        test_zero_value(issue_estimate_max, ws["D9"])
+        test_zero_value(issue_estimate_min, ws["D10"])
+
+        for row in ws[4:ws.max_row]:  # 1 Based Index
+            cell = row[3] # zeor based index
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+
+        ws["E5"] = "Sub Labels"
+        ws["E5"].font = Font(bold=True, size=14)
+        
+        start_sub = 6
+        for Label in sub_labels:
+            ws["E" + str(start_sub)] = Label
+            start_sub += 1
+
+        for row in ws[6:ws.max_row]:  # 1 Based Index
+            cell = row[4] # zeor based index
+            cell.alignment = Alignment(horizontal="left", vertical="center")
