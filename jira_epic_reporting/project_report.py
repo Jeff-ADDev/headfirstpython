@@ -14,6 +14,8 @@ from sprint import Sprint
 
 start_time = datetime.now()
 start_time_format = start_time.strftime("%m/%d/%Y, %H:%M:%S")
+date_file_info = start_time.strftime("%Y_%m_%d")
+create_date = start_time.strftime("%m/%d/%Y")
 
 load_dotenv()
 init() # Colorama   
@@ -94,104 +96,31 @@ for epicitem in epics:
             sprintitem.print_Sprint()
 
 # Create new workbook
+# Summary Tab
+# 
+#
 # Epic Tab
 # Key(link) | Summary | Team | Estimate | Issues with Points | Issues with No Points | Issues Points | Sub Labels
+#
+#  Issue Tab
+# Define
+#
+
 workbook = openpyxl.Workbook()
-worksheet_epics = workbook.active
-worksheet_epics.title = "Epics"
-worksheet_issues = workbook.create_sheet("All Issues")
+worksheet_summary = workbook.active
+worksheet_summary.title = "Summary"
+worksheet_epics = workbook.create_sheet("Epics")
+worksheet_issues = workbook.create_sheet("Issues")
 
-worksheet_epics.column_dimensions["A"].width = 16
-worksheet_epics.column_dimensions["B"].width = 50
-worksheet_epics.column_dimensions["C"].width = 30
-worksheet_epics.column_dimensions["D"].width = 18
-worksheet_epics.column_dimensions["E"].width = 18
-worksheet_epics.column_dimensions["F"].width = 18
-worksheet_epics.column_dimensions["G"].width = 18
-worksheet_epics.column_dimensions["H"].width = 40
+# Create the Epic Tab
+Epic.excel_worksheet_create(worksheet_epics, epics, jira_issue_link, project_figma_link)
 
-table = Table(displayName="TableEpics", ref="A1:H" + str(len(epics) + 1))
-style = TableStyleInfo(name="TableStyleMedium9", showFirstColumn=False,
-                    showLastColumn=False, showRowStripes=True, showColumnStripes=False)
-table.tableStyleInfo = style
-
-worksheet_epics.append(["Epic", "Summary", "Team", "Estimate", "Issues w Points", "Issues w No Points ", "Issues Total Points", "Sub Labels"])
-for epicitem in epics:
-    sub_labels = epicitem.get_sublevles()
-    worksheet_epics.append([epicitem.key, epicitem.summary, epicitem.team, epicitem.estimate, epicitem.issues_with_points, epicitem.issues_with_no_points, epicitem.issues_points, sub_labels])    
-
-worksheet_epics.add_table(table)
-
-for row in worksheet_epics[2:worksheet_epics.max_row]:  # Exclude The Header
-    cell = row[0] # zeor based index
-    value_use = cell.value
-    cell.hyperlink = f"{jira_issue_link}{value_use}"
-    cell.value = value_use
-    cell.style = "Hyperlink"
-
-for row in worksheet_epics[1:worksheet_epics.max_row]:  # Include The Header
-    cell = row[0] # zeor based index
-    cell.alignment = Alignment(horizontal="center", vertical="center")
-
-for row in worksheet_epics[2:worksheet_epics.max_row]:  # skip the header
-    cell = row[1] # zeor based index
-    cell.alignment = Alignment(wrap_text=True)
-    cell.number_format = "text"
-
-for row in worksheet_epics[1:worksheet_epics.max_row]:  # Include The Header
-    cell = row[2] # zeor based index
-    cell.alignment = Alignment(horizontal="center", vertical="center")
-
-for row in worksheet_epics[1:worksheet_epics.max_row]:  # Include The Header
-    cell = row[3] # zeor based index
-    cell.alignment = Alignment(horizontal="center", vertical="center")
-
-for row in worksheet_epics[1:worksheet_epics.max_row]:  # Include The Header
-    cell = row[4] # zeor based index
-    cell.alignment = Alignment(horizontal="center", vertical="center")
-
-for row in worksheet_epics[1:worksheet_epics.max_row]:  # Include The Header
-    cell = row[5] # zeor based index
-    cell.alignment = Alignment(horizontal="center", vertical="center")
-
-for row in worksheet_epics[1:worksheet_epics.max_row]:  # Include The Header
-    cell = row[6] # zeor based index
-    cell.alignment = Alignment(horizontal="center", vertical="center")
-
-# Add Figma Plan Link to the bottom of the Epics Sheet
-worksheet_epics["A" + str(len(epics) + 3)].hyperlink = project_figma_link
-worksheet_epics["A" + str(len(epics) + 3)].value = "Figma Plan"
-worksheet_epics["A" + str(len(epics) + 3)].style = "Hyperlink"
-
-# Start Building Issues Tab
-worksheet_issues.column_dimensions["A"].width = 16
-worksheet_issues.column_dimensions["B"].width = 50
-worksheet_issues.column_dimensions["C"].width = 30
-worksheet_issues.column_dimensions["D"].width = 18
-worksheet_issues.column_dimensions["E"].width = 18
-worksheet_issues.column_dimensions["F"].width = 18
-worksheet_issues.column_dimensions["G"].width = 18
-worksheet_issues.column_dimensions["H"].width = 40
-
-# Get all Issue Count
-all_issues = 0
-for epicitem in epics:
-    all_issues += (len(epicitem.issues))
-table_issues = Table(displayName="TableIssues", ref="A1:E" + str(all_issues + 1))
-style_issues = TableStyleInfo(name="TableStyleMedium9", showFirstColumn=False,
-                    showLastColumn=False, showRowStripes=True, showColumnStripes=False)
-table_issues.tableStyleInfo = style_issues
-
-worksheet_issues.append(["Issue", "Summary", "Team", "Estimate", "Size"])
-for epicitem in epics:
-    for issueitem in epicitem.issues:
-        worksheet_issues.append([issueitem.key, issueitem.summary, epicitem.team, issueitem.size])
-
-worksheet_issues.add_table(table_issues)
+# Create the Issue Tab
+Issue.excel_worksheet_create(worksheet_issues, epics, jira_issue_link)
 
 # Handle Directory
 if os.path.exists(sheets_location):
-    saveexcelfile = sheets_location + "Project " + project_label + " Details.xlsx"
+    saveexcelfile = sheets_location + date_file_info + " Project " + project_label + " Details.xlsx"
 else:
     os.makedirs(sheets_location)
 
@@ -199,4 +128,5 @@ else:
 if os.path.exists(saveexcelfile):
     os.remove(saveexcelfile)
 
+# Save Workbook
 workbook.save(saveexcelfile)
