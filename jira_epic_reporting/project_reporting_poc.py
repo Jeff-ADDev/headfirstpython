@@ -6,6 +6,7 @@ from openpyxl.utils import get_column_letter
 from colorama import init, Fore, Back, Style
 from dotenv import load_dotenv
 from datetime import datetime
+import epic
 
 start_time = datetime.now()
 start_time_format = start_time.strftime("%m/%d/%Y, %H:%M:%S")
@@ -16,22 +17,39 @@ init() # Colorama
 jirakey = os.getenv("JIRA_API_KEY")
 url_location = os.getenv("JIRA_REV_LOCATION")
 url_search = os.getenv("JIRA_SEARCH")
+url_board = os.getenv("JIRA_BOARD")
 sheets_location = os.getenv("SHEETS_LOCATION")
 
 
-main_serach = f"https://{url_location}/{url_search}"
+main_serach = f"{url_location}/{url_search}"
 header = {"Authorization": "Basic " + jirakey}
+baord_issues = f"{url_location}/{url_board}"
 
+# 70 is board ID for RevSite Raiders
+raider_baord_issues = baord_issues + "70/sprint?maxResults=50&startAt=50"
+response = requests.get(raider_baord_issues, headers=header)
+if response.status_code == 200:
+    print(Fore.GREEN + "Success! - Raider Board Issues" + Style.RESET_ALL)
+    data = response.json()
+    for sprint in data["values"]:
+        date_obj = datetime.strptime(sprint["startDate"], "%Y-%m-%dT%H:%M:%S.%fZ")
+        print(str(date_obj.month) + "/" + str(date_obj.day) + "/" + str(date_obj.year))
+        print(sprint["name"])
+else:
+    print(Fore.RED + "Failed - Raider Board Issues" + Style.RESET_ALL)
+
+epics = []
 # Retrieve all epics
 # Teamm, Status, Labels
 # issuetype = Epic AND project = "Agile RevSite Raider$" AND (Status = 'FUTURE' OR Status = 'NEXT' OR Status = 'Now') AND labels in (ReviewMarketing)
 all_epics = main_serach + "'issuetype'='Epic' AND 'project'='Agile RevSite Raider$' AND ('Status'='FUTURE' OR 'Status'='NEXT' OR 'Status'='Now') AND 'labels' in ('ReviewMarketing')"
 response = requests.get(all_epics, headers=header)
 if response.status_code == 200:
-    print(Fore.GREEN + "Success! - All Epics" + Style.RESET_ALL)
     data = response.json()
-    for issue in data["issues"]:
-        print(issue["fields"]["summary"])
+    for epicitem in data["issues"]:
+        print(epicitem["fields"]["summary"])
+        epics.append(epic.Epic(epicitem["id"], epicitem["fields"]["summary"], epicitem["fields"]["created"]))
+    print(Fore.GREEN + f"Success! - All Epics {len(epics)}" + Style.RESET_ALL)
 else:
     print(Fore.RED + "Failed!")
 
@@ -40,8 +58,8 @@ response = requests.get(epic_info, headers=header)
 if response.status_code == 200:
     print(Fore.GREEN + "Success! - Epic Item" + Style.RESET_ALL)
     data = response.json()
-    for issue in data["issues"]:
-        print(issue["fields"]["summary"])
+    for epic in data["issues"]:
+        print(epic["fields"]["summary"])
 else:
     print(Fore.RED + "Failed!")
 
@@ -50,13 +68,13 @@ response = requests.get(epic_issues, headers=header)
 if response.status_code == 200:
     print(Fore.GREEN + "Success! - Epic Issues" + Style.RESET_ALL)
     data = response.json()
-    for issue in data["issues"]:
+    for epic in data["issues"]:
         print(Fore.YELLOW + Style.BRIGHT 
-              + issue["key"] + " - "
-              + issue["fields"]["summary"] + Style.RESET_ALL)
+              + epic["key"] + " - "
+              + epic["fields"]["summary"] + Style.RESET_ALL)
         
         try:
-            for item in issue["fields"]["customfield_10010"]:
+            for item in epic["fields"]["customfield_10010"]:
                 cf_10010_name = item["name"]
                 cf_10010_state = item["state"]
         except:
@@ -64,9 +82,9 @@ if response.status_code == 200:
                 cf_10010_state = ""
         
         print(Fore.LIGHTYELLOW_EX + Style.DIM
-              + issue["fields"]["issuetype"]["name"] 
-              + " : " + str(issue["fields"]["customfield_10032"])
-              + " : " + issue["fields"]["project"]["name"] 
+              + epic["fields"]["issuetype"]["name"] 
+              + " : " + str(epic["fields"]["customfield_10032"])
+              + " : " + epic["fields"]["project"]["name"] 
               + " : " + cf_10010_name
               + " : " + cf_10010_state
               + Style.RESET_ALL)
