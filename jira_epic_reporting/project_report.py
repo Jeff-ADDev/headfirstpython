@@ -34,9 +34,17 @@ header = {"Authorization": "Basic " + jirakey}
 baord_issues = f"{url_location}/{url_board}"
 epics: List[Epic] = []  
 
+def terminal_update(message, data, bold):
+    if bold:
+        print(Back.GREEN + Fore.BLACK + Style.BRIGHT + f"  {message}: " + Back.BLUE + Fore.BLACK + Style.BRIGHT + f" {data} " + Style.RESET_ALL, end="\r")
+    else:
+        print(Fore.GREEN + Style.BRIGHT + f"  {message}: " + Fore.BLUE + Style.NORMAL + f" {data} " + Style.RESET_ALL, end="\r")
+
+
 # Retrieve all epics from main project label
 # Get Sub labels to help break down the epics
 def get_epics(label, con_out):
+    terminal_update("Retrieving Epics", " - ", False)
     all_epics = main_serach + "'issuetype'='Epic' AND ('Status'='FUTURE' OR 'Status'='NEXT' OR 'Status'='Now') AND 'labels' in ('" + label + "')"
     response = requests.get(all_epics, headers=header)
     if response.status_code == 200:
@@ -83,7 +91,11 @@ def get_issues():
     issues_with_points = 0
     issues_points = 0
     issues_with_no_points = 0
+    count_epics = (len(epics)+1)
+    count_epics_current = 1
     for epicitem in epics:
+        terminal_update("Retrieving Issues on Epics", f"{count_epics_current}/{count_epics}", False)
+        count_epics_current += 1
         epic_issues = main_serach + "'Epic Link'='" + epicitem.key + "' and STATUS != Cancelled"
         response = requests.get(epic_issues, headers=header)
         if response.status_code == 200:
@@ -164,6 +176,7 @@ def output_console():
 # Define
 #
 def create_excel(label):
+    terminal_update("Creating Excel Document", " - ", False)
     workbook = openpyxl.Workbook()
     worksheet_summary = workbook.active
     worksheet_summary.title = "Summary"
