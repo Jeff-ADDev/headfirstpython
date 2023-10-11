@@ -175,7 +175,7 @@ def output_console():
 # --- Issue Tab ---
 # Define
 #
-def create_excel(label):
+def create_excel(label, other_links):
     terminal_update("Creating Excel Document", " - ", False)
     workbook = openpyxl.Workbook()
     worksheet_summary = workbook.active
@@ -184,10 +184,10 @@ def create_excel(label):
     worksheet_issues = workbook.create_sheet("Issues")
 
     # Create the Summary Tab
-    Epic.excel_worksheet_summary(worksheet_summary, epics, label, create_date)
+    Epic.excel_worksheet_summary(worksheet_summary, epics, label, create_date, other_links)
 
     # Create the Epic Tab
-    Epic.excel_worksheet_create(worksheet_epics, epics, jira_issue_link, project_figma_link,label)
+    Epic.excel_worksheet_create(worksheet_epics, epics, jira_issue_link,label)
 
     # Create the Issue Tab
     Issue.excel_worksheet_create(worksheet_issues, epics, jira_issue_link)
@@ -208,6 +208,17 @@ def save_file(path, filename, wb):
     # Save Workbook
     wb.save(saveexcelfile)
 
+def get_links(file):
+    config = {}
+    try:
+        with open(file) as f:
+            for line in f:
+                key, value = line.split("|")
+                config[key] = value
+        return config
+    except:
+        return config
+
 def main(args):
     if args.label:
         project_label = args.label
@@ -215,10 +226,14 @@ def main(args):
     con_out = False
     if args.console:
         con_out = True
+    
+    other_links = {}
+    if args.file:
+        other_links = get_links(args.file)
 
     get_epics(project_label, con_out)
     get_issues()
-    wb = create_excel(project_label)
+    wb = create_excel(project_label, other_links)
     save_file(path_location,project_label,wb)
 
     if con_out:
@@ -228,5 +243,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Create Excel Sheet for Project Reporting")
     parser.add_argument("-l", "--label", help="Label for the project")
     parser.add_argument("-c", "--console", help="Enable Console Output", action="store_true")
+    parser.add_argument("-f", "--file", help="File name for reporting links")
     args = parser.parse_args()
     main(args)
+
+# python3 project_report.py --label ReviewMarketing --console --file reviewmarketing.txt
+# One Drive Location:
+# https://revlocalinc-my.sharepoint.com/:f:/g/personal/jholmes_revlocal_com/EiR1Aui9R9ZEirrVwyOyLeIBHfm2fngUvXbFNcD-nczL3w?e=o8o1le

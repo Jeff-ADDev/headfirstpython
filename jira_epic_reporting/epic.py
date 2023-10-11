@@ -2,12 +2,11 @@ from typing import List
 from issue import Issue
 from colorama import init, Fore, Back, Style
 from datetime import datetime
-from openpyxl import load_workbook
+from openpyxl import Workbook
+from openpyxl.worksheet.hyperlink import Hyperlink
 from openpyxl.worksheet.table import Table, TableStyleInfo
-from openpyxl.styles import numbers
-from openpyxl.styles import Alignment
-from openpyxl.styles import Font
-from openpyxl.utils import get_column_letter
+from openpyxl.styles import Font, Alignment, numbers
+from openpyxl.utils import get_column_letter, quote_sheetname
 
 class Epic:
     def __init__(self, id, key, summary, create_date):
@@ -63,7 +62,7 @@ class Epic:
               "\n    " + Fore.YELLOW + Style.NORMAL + f"{self.issues_with_points} issues have points and {self.issues_with_no_points} don't. {self.issues_points} points total." +
               "\n    " + Fore.MAGENTA + " Sub Labels: " + Fore.WHITE + str(self.sub_labels) + Style.RESET_ALL)
         
-    def excel_worksheet_create(ws, epics, jira_issue_link, project_figma_link, project_label):
+    def excel_worksheet_create(ws, epics, jira_issue_link, project_label):
         ws.column_dimensions["A"].width = 16
         ws.column_dimensions["B"].width = 50
         ws.column_dimensions["C"].width = 30
@@ -132,11 +131,11 @@ class Epic:
             cell.alignment = Alignment(horizontal="center", vertical="center")
 
         # Add Figma Plan Link to the bottom of the Epics Sheet
-        ws["A" + str(len(epics) + 3)].hyperlink = project_figma_link
-        ws["A" + str(len(epics) + 3)].value = "Figma Plan"
-        ws["A" + str(len(epics) + 3)].style = "Hyperlink"
+        #ws["A" + str(len(epics) + 3)].hyperlink = project_figma_link
+        #ws["A" + str(len(epics) + 3)].value = "Figma Plan"
+        #ws["A" + str(len(epics) + 3)].style = "Hyperlink"
 
-    def excel_worksheet_summary(ws, epics, project_label, project_created):
+    def excel_worksheet_summary(ws, epics, project_label, project_created, other_links):
         def test_zero_value(value, cell):
             if value == 0:
                 cell.value = " - "
@@ -219,10 +218,13 @@ class Epic:
         ws["B1"] = project_created
         ws["B1"].font = Font(italic=True, size=12)
 
-        ws["A3"] = "Epics"
-        ws["A3"].font = Font(bold=True, size=14)
-        ws["C3"] = "All Issues"
-        ws["C3"].font = Font(bold=True, size=14)
+        ws["A3"].value = '=HYPERLINK("#Epics!A1","Epics")'
+        ws["A3"].style = "Hyperlink"
+        ws["A3"].font = Font(bold=True, underline="single", size=14)
+
+        ws["C3"] = '=HYPERLINK("#Issues!A1","All Issues")'
+        ws["C3"].style = "Hyperlink"
+        ws["C3"].font = Font(bold=True, underline="single", size=14)
 
         ws["A4"] = "Count"
         ws["A5"] = "Total Estimate"
@@ -244,6 +246,15 @@ class Epic:
         for row in ws[4:ws.max_row]:  # 1 Based Index
             cell = row[1] # zeor based index
             cell.alignment = Alignment(horizontal="center", vertical="center")
+
+        link_location = 12
+        if len(other_links) > 0:
+            for key, value in other_links.items():
+                ws["A" + str(link_location)].hyperlink = value
+                ws["A" + str(link_location)].value = key
+                ws["A" + str(link_location)].style = "Hyperlink"
+                ws["A" + str(link_location)].font = Font(bold=True, size=14)
+                link_location += 1
 
         ws["C4"] = "Count"
         ws["C5"] = "Total Estimate"
