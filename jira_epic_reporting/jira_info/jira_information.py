@@ -11,6 +11,7 @@ from datetime import datetime
 from epic import Epic
 from issue import Issue
 from sprint import Sprint
+from jirainfo import Jirainfo
 
 start_time = datetime.now()
 start_time_format = start_time.strftime("%m/%d/%Y, %H:%M:%S")
@@ -34,8 +35,8 @@ board_info = f"{url_location}/{url_board}"
 header = {"Authorization": "Basic " + jirakey}
 baord_issues = f"{url_location}/{url_board}"
 epics: List[Epic] = []  
-temp_boards = []
-
+temp_boards = {}
+temp_sprints = {}
 
 def terminal_update(message, data, bold):
     if bold:
@@ -51,8 +52,8 @@ def get_boards(con_out):
     if response.status_code == 200:
         data = response.json()
         for boarditem in data["values"]:
-            temp_boards.append(boarditem["id"])
-            print(f"ID - {boarditem['id']} - Name - {boarditem['name']} - Type - {boarditem['type']}")
+            temp_boards[boarditem["id"]] = f"{boarditem['name']}|{boarditem['type']}"
+            # print(f"ID - {boarditem['id']} - Name - {boarditem['name']} - Type - {boarditem['type']}")
             # location
             #           projectId
             #           name
@@ -80,7 +81,8 @@ def get_sprints(con_out):
             if response.status_code == 200:
                 data = response.json()
                 for sprintitem in data["values"]:
-                    print(f"[{boarditem}-{count_boarditem_sprints}] ID - {sprintitem['id']} - Name - {sprintitem['name']} - State - {sprintitem['state']}")
+                    #print(f"[{boarditem}-{count_boarditem_sprints}] ID - {sprintitem['id']} - Name - {sprintitem['name']} - State - {sprintitem['state']}")
+                    temp_sprints[sprintitem["id"]] = f"{boarditem}|{count_boarditem_sprints}|{sprintitem['name']}|{sprintitem['state']}"
                     count_boarditem_sprints += 1
                     #"values": [
                     #    {
@@ -262,6 +264,29 @@ def create_excel(label):
 
     return workbook
 
+def create_excel_jira_summary():
+    workbook = openpyxl.Workbook()
+    worksheet_boards = workbook.active
+    worksheet_boards.title = "Boards"
+    worksheet_sprints = workbook.create_sheet("Sprints")
+    Jirainfo.excel_boards(worksheet_boards, temp_boards)
+    Jirainfo.excel_sprints(worksheet_sprints, temp_sprints)
+    save_file_info(path_location, "Jira Info", workbook)
+
+def save_file_info(path, filename, wb):
+    # Handle Directory
+    if os.path.exists(path):
+        saveexcelfile = path + date_file_info + " " + filename + ".xlsx"
+    else:
+        os.makedirs(path)
+
+    # Check For File Existence - Delete if exists
+    if os.path.exists(saveexcelfile):
+        os.remove(saveexcelfile)
+
+    # Save Workbook
+    wb.save(saveexcelfile)
+
 def save_file(path, filename, wb):
     # Handle Directory
     if os.path.exists(path):
@@ -291,6 +316,8 @@ def main(args):
     # Get People
 
     # Get Issues People have be assigned
+
+    create_excel_jira_summary()
 
     #get_epics(project_label, con_out)
     #get_issues()

@@ -27,7 +27,6 @@ url_board = os.getenv("JIRA_BOARD")
 path_location = os.getenv("PATH_LOCATION")
 project_label = os.getenv("PROJECT_LABEL")
 jira_issue_link = os.getenv("JIRA_ISSUE_LINK")
-project_figma_link = os.getenv("FIGMA_LINK")
 
 main_serach = f"{url_location}/{url_search}"
 header = {"Authorization": "Basic " + jirakey}
