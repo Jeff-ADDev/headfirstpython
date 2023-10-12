@@ -21,9 +21,11 @@ load_dotenv()
 init() # Colorama   
 
 jirakey = os.getenv("JIRA_API_KEY")
+claudekey = os.getenv("CLAUDE_API_KEY")
 url_location = os.getenv("JIRA_REV_LOCATION")
 url_search = os.getenv("JIRA_SEARCH")
 url_board = os.getenv("JIRA_BOARD")
+url_issue = os.getenv("JIRA_ISSUE")
 path_location = os.getenv("PATH_LOCATION")
 project_label = os.getenv("PROJECT_LABEL")
 jira_issue_link = os.getenv("JIRA_ISSUE_LINK")
@@ -34,6 +36,7 @@ baord_issues = f"{url_location}/{url_board}"
 epics: List[Epic] = []  
 
 def terminal_update(message, data, bold):
+    print(Style.RESET_ALL + "                                                                                               " + Style.RESET_ALL, end="\r")
     if bold:
         print(Back.GREEN + Fore.BLACK + Style.BRIGHT + f"  {message}: " + Back.BLUE + Fore.BLACK + Style.BRIGHT + f" {data} " + Style.RESET_ALL, end="\r")
     else:
@@ -44,7 +47,7 @@ def terminal_update(message, data, bold):
 # Get Sub labels to help break down the epics
 def get_epics(label, con_out):
     terminal_update("Retrieving Epics", " - ", False)
-    all_epics = main_serach + "'issuetype'='Epic' AND ('Status'='FUTURE' OR 'Status'='NEXT' OR 'Status'='Now') AND 'labels' in ('" + label + "')"
+    all_epics = main_serach + "'issuetype'='Epic' AND 'labels' in ('" + label + "')"
     response = requests.get(all_epics, headers=header)
     if response.status_code == 200:
         data = response.json()
@@ -52,6 +55,7 @@ def get_epics(label, con_out):
             epic_add = Epic(epicitem["id"], epicitem["key"], epicitem["fields"]["summary"], epicitem["fields"]["created"])
             epic_add.set_team(epicitem["fields"]["project"]["name"])
             epic_add.set_estimate(epicitem["fields"]["customfield_10032"])
+            epic_add.set_description(epicitem["fields"]["description"])
             for label in epicitem["fields"]["labels"]:
                 if (label != project_label):
                     epic_add.add_sub_label(label)
@@ -61,6 +65,17 @@ def get_epics(label, con_out):
     else:
         if con_out:
             print(Fore.RED + "Failed - All Epics" + Style.RESET_ALL)
+
+def get_comments(con_out):
+    terminal_update("Retrieving Comments", " - ", False)
+    for epicitem in epics:
+        #https://revlocaldev.atlassian.net/rest/api/2/issue/ARR-2392/comment
+        all_comments = f"{url_location}/{url_issue}{epicitem.key}/comment"
+        response = requests.get(all_comments, headers=header)
+        if response.status_code == 200:
+            data = response.json()
+            for commentitem in data["comments"]:
+                epicitem.add_comment(commentitem["body"])
 
 # Retrieve all the issues attached to the epics
 # JSON Issue
@@ -174,13 +189,14 @@ def output_console():
 # --- Issue Tab ---
 # Define
 #
-def create_excel(label, other_links):
+def create_excel(label, other_links, ai_out):
     terminal_update("Creating Excel Document", " - ", False)
     workbook = openpyxl.Workbook()
     worksheet_summary = workbook.active
     worksheet_summary.title = "Summary"
     worksheet_epics = workbook.create_sheet("Epics")
     worksheet_issues = workbook.create_sheet("Issues")
+    worksheet_ai = workbook.create_sheet("Epic Health")
 
     # Create the Summary Tab
     Epic.excel_worksheet_summary(worksheet_summary, epics, label, create_date, other_links)
@@ -190,6 +206,9 @@ def create_excel(label, other_links):
 
     # Create the Issue Tab
     Issue.excel_worksheet_create(worksheet_issues, epics, jira_issue_link)
+
+    if ai_out:
+        Epic.excel_worksheet_ai_create(worksheet_ai, epics, jira_issue_link, claudekey)
 
     return workbook
 
@@ -226,13 +245,22 @@ def main(args):
     if args.console:
         con_out = True
     
+    ai_out = False
+    if args.ai:
+        ai_out = True
+
     other_links = {}
     if args.file:
         other_links = get_links(args.file)
 
     get_epics(project_label, con_out)
     get_issues()
-    wb = create_excel(project_label, other_links)
+    
+    if ai_out:
+        get_comments(con_out)
+
+
+    wb = create_excel(project_label, other_links, ai_out)
     save_file(path_location,project_label,wb)
 
     if con_out:
@@ -243,9 +271,13 @@ if __name__ == '__main__':
     parser.add_argument("-l", "--label", help="Label for the project")
     parser.add_argument("-c", "--console", help="Enable Console Output", action="store_true")
     parser.add_argument("-f", "--file", help="File name for reporting links")
+    parser.add_argument("-a", "--ai", help="Use Description and Comments for Epic Health", action="store_true")
     args = parser.parse_args()
     main(args)
 
 # python3 project_report.py --label ReviewMarketing --console --file reviewmarketing.txt
+
+# python3 project_report.py --label ReviewMarketing --console --file reviewmarketing.txt --ai
+
 # One Drive Location:
 # https://revlocalinc-my.sharepoint.com/:f:/g/personal/jholmes_revlocal_com/EiR1Aui9R9ZEirrVwyOyLeIBHfm2fngUvXbFNcD-nczL3w?e=o8o1le

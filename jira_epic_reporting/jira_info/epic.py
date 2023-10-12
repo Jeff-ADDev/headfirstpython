@@ -21,6 +21,7 @@ class Epic:
         self.issues_with_points = 0
         self.issues_points = 0
         self.issues_with_no_points = 0
+        self.description = ""
 
     def add_issue(self, issue):
         self.issues.append(issue)   
@@ -42,6 +43,9 @@ class Epic:
     
     def set_issues_with_no_points(self, issues_with_no_points):
         self.issues_with_no_points = issues_with_no_points
+
+    def set_description(self, description):
+        self.description = description
 
     def get_sublevles(self):
         sub_label_print = ""

@@ -44,6 +44,19 @@ def terminal_update(message, data, bold):
     else:
         print(Fore.GREEN + Style.BRIGHT + f"  {message}: " + Fore.BLUE + Style.NORMAL + f" {data} " + Style.RESET_ALL, end="\r")
 
+def terminal_busy(message, count):
+    if count > 3:
+        count = 0
+    data = ""
+    if count == 0:
+        data = "|"
+    elif count == 1:
+        data = "/"
+    elif count == 2:
+        data = "-"
+    elif count == 3:
+        data = "\\"
+    print(Fore.GREEN + Style.BRIGHT + f"  {message}: " + Fore.BLUE + Style.NORMAL + f" {data} " + Style.RESET_ALL, end="\r")
 
 def get_boards(con_out):
     terminal_update("Retrieving Boards", " - ", False)
@@ -61,28 +74,31 @@ def get_boards(con_out):
             #           projectTypeKey
             #           displayName
             #           projectNmae
-        if con_out:
+        if con_out: 
             print(Fore.GREEN + f"Success! - Board Info {len(epics)}" + Style.RESET_ALL)
         else:
             if con_out:
                 print(Fore.RED + "Failed - All Boards Info" + Style.RESET_ALL)
 
 def get_sprints(con_out):
-    terminal_update("Retrieving Sprints", " - ", False)
     # https://revlocaldev.atlassian.net/rest/agile/1.0/board/BOARD/sprint?maxResults=50&startAt=46
+    count = 0
     for boarditem in temp_boards:
         start_location = 0
         count_boarditem_sprints = 0
         has_more_sprints = True
         while (has_more_sprints):
+            terminal_busy("Retrieving Sprints", count)
+            count += 1
+            if count > 3:
+                count = 0
             sprint_info = f"{url_location}/rest/agile/1.0/board/{boarditem}/sprint?maxResults=50&startAt={start_location}"
-            print(f"URL is {sprint_info}")
             response = requests.get(sprint_info, headers=header)
             if response.status_code == 200:
                 data = response.json()
                 for sprintitem in data["values"]:
                     #print(f"[{boarditem}-{count_boarditem_sprints}] ID - {sprintitem['id']} - Name - {sprintitem['name']} - State - {sprintitem['state']}")
-                    temp_sprints[sprintitem["id"]] = f"{boarditem}|{count_boarditem_sprints}|{sprintitem['name']}|{sprintitem['state']}"
+                    temp_sprints[sprintitem["id"]] = f"{boarditem}|{count_boarditem_sprints}|{sprintitem['name']}|{sprintitem['state']}|{sprintitem['startDate']}|{sprintitem['endDate']}"
                     count_boarditem_sprints += 1
                     #"values": [
                     #    {
@@ -103,7 +119,6 @@ def get_sprints(con_out):
                 else:
                     has_more_sprints = False
             else:
-                print("FAILED - Sprints")
                 has_more_sprints = False
     if con_out:
         print(Fore.GREEN + f"Success! - Sprint Info {len(epics)}" + Style.RESET_ALL)
@@ -123,6 +138,7 @@ def get_epics(label, con_out):
             epic_add = Epic(epicitem["id"], epicitem["key"], epicitem["fields"]["summary"], epicitem["fields"]["created"])
             epic_add.set_team(epicitem["fields"]["project"]["name"])
             epic_add.set_estimate(epicitem["fields"]["customfield_10032"])
+            epic_add.description = epicitem["fields"]["description"]
             for label in epicitem["fields"]["labels"]:
                 if (label != project_label):
                     epic_add.add_sub_label(label)
