@@ -9,6 +9,8 @@ from openpyxl.worksheet.table import Table, TableStyleInfo
 from openpyxl.styles import Font, Alignment, numbers
 from openpyxl.utils import get_column_letter, quote_sheetname
 import jira_utils
+import console_util
+import claude_util
 
 def get_project_sub_labels(epics, project_label):
     sub_labels = []
@@ -191,7 +193,6 @@ def excel_worksheet_create_epics(ws, epics, jira_issue_link, project_label):
 
     # Populate data
     ws.append(["Epic", "Summary", "Team", "Estimate", "Issues w Points", "Issues w No Points ", "Issues Total Points", "Sub Labels"])
-    print(f"Test Count: {len(epics)}")
     for epicitem in epics:
         sub_labels = ""
         coun_label = 0
@@ -202,7 +203,6 @@ def excel_worksheet_create_epics(ws, epics, jira_issue_link, project_label):
                     coun_label += 1
                 else:
                     sub_labels += ", " + label
-        print(f"TEST util: {epicitem.key} {epicitem.summary} {epicitem.team} {epicitem.estimate} {epicitem.issues_with_points} {epicitem.issues_with_no_points} {epicitem.issues_points} {sub_labels}")
         ws.append([epicitem.key, epicitem.summary, epicitem.team, epicitem.estimate, epicitem.issues_with_points, epicitem.issues_with_no_points, epicitem.issues_points, sub_labels])    
 
     ws.add_table(table)
@@ -367,3 +367,36 @@ def excel_worksheet_create_issues(ws, epics, jira_issue_link, table_name):
     for row in ws[1:ws.max_row]:  # Include The Header
         cell = row[11] # zeor based index
         cell.alignment = Alignment(horizontal="center", vertical="center")
+
+def create_excel(epics, label, other_links, ai_out, create_date, jira_issue_link, claudekey):
+    console_util.terminal_update("Creating Excel Document", " - ", False)
+    workbook = Workbook()
+    worksheet_summary = workbook.active
+    worksheet_summary.title = "Summary"
+    worksheet_epics = workbook.create_sheet("All Epics")
+    worksheet_issues = workbook.create_sheet("All Issues")
+    
+
+    # Create the Summary Tab
+    excel_worksheet_summary(worksheet_summary, epics, label, create_date, other_links)
+
+    # Create the Epic Tab
+    excel_worksheet_create_epics(worksheet_epics, epics, jira_issue_link,label)
+
+    # Create the Issue Tab
+    excel_worksheet_create_issues(worksheet_issues, epics, jira_issue_link, "TableAllIssues")
+
+    # Create the Sub Label Tabs
+    sub_labels = get_project_sub_labels(epics, label)
+    for sub_label in sub_labels:
+        sheet_epics = get_epics_with_sub_label(epics, sub_label)
+        if len(sheet_epics) > 0:
+            worksheet_sub_label = workbook.create_sheet(sub_label)
+            excel_worksheet_create_issues(worksheet_sub_label, sheet_epics, 
+                                                     jira_issue_link, f"Table{sub_label}Issues")
+
+    if ai_out:
+        worksheet_ai = workbook.create_sheet("Epic Health")
+        claude_util.excel_worksheet_ai_create(worksheet_ai, epics, jira_issue_link, claudekey)
+
+    return workbook

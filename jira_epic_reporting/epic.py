@@ -52,7 +52,7 @@ class Epic:
     def set_description(self, description):
         self.description = description
 
-    def get_sublevles(self):
+    def get_sublevels(self):
         sub_label_print = ""
         count_label = 0
         for sub_label in self.sub_labels:
