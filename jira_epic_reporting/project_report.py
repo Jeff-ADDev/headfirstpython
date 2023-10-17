@@ -13,6 +13,7 @@ from issue import Issue
 from sprint import Sprint
 import excel_util
 import claude_util
+import jira_utils
 
 start_time = datetime.now()
 start_time_format = start_time.strftime("%m/%d/%Y, %H:%M:%S")
@@ -32,10 +33,9 @@ path_location = os.getenv("PATH_LOCATION")
 project_label = os.getenv("PROJECT_LABEL")
 jira_issue_link = os.getenv("JIRA_ISSUE_LINK")
 
-main_serach = f"{url_location}/{url_search}"
+main_search = f"{url_location}/{url_search}"
 header = {"Authorization": "Basic " + jirakey}
 baord_issues = f"{url_location}/{url_board}"
-epics: List[Epic] = []  
 
 def terminal_update(message, data, bold):
     print(Style.RESET_ALL + "                                                                                               " + Style.RESET_ALL, end="\r")
@@ -47,6 +47,8 @@ def terminal_update(message, data, bold):
 
 # Retrieve all epics from main project label
 # Get Sub labels to help break down the epics
+
+"""
 def get_epics(label, con_out):
     terminal_update("Retrieving Epics", " - ", False)
     all_epics = main_serach + "'issuetype'='Epic' AND 'labels' in ('" + label + "')"
@@ -67,8 +69,8 @@ def get_epics(label, con_out):
     else:
         if con_out:
             print(Fore.RED + "Failed - All Epics" + Style.RESET_ALL)
-
-def get_comments(con_out):
+"""
+def get_comments(epics, con_out):
     terminal_update("Retrieving Comments", " - ", False)
     for epicitem in epics:
         #https://revlocaldev.atlassian.net/rest/api/2/issue/ARR-2392/comment
@@ -103,7 +105,7 @@ def get_comments(con_out):
 #            updated - "2021-03-01T15:00:00.000-0400        updated
 #            description - "This is a description"          description
 
-def get_issues():
+def get_issues(epics):
     issues_with_points = 0
     issues_points = 0
     issues_with_no_points = 0
@@ -112,7 +114,7 @@ def get_issues():
     for epicitem in epics:
         terminal_update("Retrieving Issues on Epics", f"{count_epics_current}/{count_epics}", False)
         count_epics_current += 1
-        epic_issues = main_serach + "'Epic Link'='" + epicitem.key + "' and STATUS != Cancelled"
+        epic_issues = main_search + "'Epic Link'='" + epicitem.key + "' and STATUS != Cancelled"
         response = requests.get(epic_issues, headers=header)
         if response.status_code == 200:
             data = response.json()
@@ -153,13 +155,13 @@ def get_issues():
                 epicitem.set_issues_with_no_points(issues_with_no_points)
     
 # Console Output Information
-def output_console():
+def output_console(epics):
     for epicitem in epics:
-        epicitem.print_Epic()
+        epicitem.print_epic()
         for issueitem in epicitem.issues:
-            issueitem.print_Issue()
+            issueitem.print_issue()
             for sprintitem in issueitem.sprint:
-                sprintitem.print_Sprint()
+                sprintitem.print_sprint()
 
 # Create new workbook
 # --- Summary Tab ---
@@ -191,7 +193,7 @@ def output_console():
 # --- Issue Tab ---
 # Define
 #
-def create_excel(label, other_links, ai_out):
+def create_excel(epics, label, other_links, ai_out):
     terminal_update("Creating Excel Document", " - ", False)
     workbook = openpyxl.Workbook()
     worksheet_summary = workbook.active
@@ -250,6 +252,8 @@ def get_links(file):
         return config
 
 def main(args):
+    epics: List[Epic] = []  
+
     if args.label:
         project_label = args.label
 
@@ -265,18 +269,19 @@ def main(args):
     if args.file:
         other_links = get_links(args.file)
 
-    get_epics(project_label, con_out)
-    get_issues()
+    epics = jira_utils.get_epics(project_label, con_out, main_search, header)
+
+    get_issues(epics)
     
     if ai_out:
-        get_comments(con_out)
+        get_comments(epics, con_out)
 
 
-    wb = create_excel(project_label, other_links, ai_out)
+    wb = create_excel(epics, project_label, other_links, ai_out)
     save_file(path_location,project_label,wb)
 
     if con_out:
-        output_console()  
+        output_console(epics)  
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Create Excel Sheet for Project Reporting")

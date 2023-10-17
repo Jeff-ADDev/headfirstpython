@@ -13,7 +13,7 @@ class Sprint:
     def set_completeDate(self, completeDate):
         self.completeDate = datetime.strptime(completeDate, "%Y-%m-%dT%H:%M:%S.%fZ")
 
-    def print_Sprint(self):
+    def print_sprint(self):
         print_completeDate = ""
         if self.completeDate != "":
             print_completeDate = "Complete: " + str(self.completeDate.month) + "/" + str(self.completeDate.day) + "/" + str(self.completeDate.year)

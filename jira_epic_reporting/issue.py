@@ -90,7 +90,7 @@ class Issue:
     def set_completeDate(self, completeDate):
         self.completeDate = completeDate
 
-    def print_Issue(self):
+    def print_issue(self):
         print(Fore.CYAN + Style.BRIGHT + 
               "  Issue-" + self.key + ": " + Fore.CYAN + Style.NORMAL + self.summary 
               + Fore.BLUE + Style.BRIGHT + " (" + str(self.size) + ")" + Style.RESET_ALL)

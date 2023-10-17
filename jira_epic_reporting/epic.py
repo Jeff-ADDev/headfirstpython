@@ -8,8 +8,6 @@ from openpyxl.worksheet.table import Table, TableStyleInfo
 from openpyxl.styles import Font, Alignment, numbers
 from openpyxl.utils import get_column_letter, quote_sheetname
 from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
-import jira_utils
-import excel_util
 
 class Epic:
     def __init__(self, id, key, summary, create_date):
@@ -65,7 +63,7 @@ class Epic:
                 sub_label_print += sub_label + ", "
         return sub_label_print
 
-    def print_Epic(self):
+    def print_epic(self):
         print(Fore.YELLOW + Style.BRIGHT + 
               "Epic-" + str(self.key) + ": " + Fore.LIGHTYELLOW_EX + Style.NORMAL + self.summary + Fore.WHITE + 
               " Created: " + str(self.create_date.month) + "/" + str(self.create_date.day) + "/" + str(self.create_date.year) +

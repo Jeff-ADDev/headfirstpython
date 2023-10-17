@@ -191,6 +191,7 @@ def excel_worksheet_create_epics(ws, epics, jira_issue_link, project_label):
 
     # Populate data
     ws.append(["Epic", "Summary", "Team", "Estimate", "Issues w Points", "Issues w No Points ", "Issues Total Points", "Sub Labels"])
+    print(f"Test Count: {len(epics)}")
     for epicitem in epics:
         sub_labels = ""
         coun_label = 0
@@ -201,6 +202,7 @@ def excel_worksheet_create_epics(ws, epics, jira_issue_link, project_label):
                     coun_label += 1
                 else:
                     sub_labels += ", " + label
+        print(f"TEST util: {epicitem.key} {epicitem.summary} {epicitem.team} {epicitem.estimate} {epicitem.issues_with_points} {epicitem.issues_with_no_points} {epicitem.issues_points} {sub_labels}")
         ws.append([epicitem.key, epicitem.summary, epicitem.team, epicitem.estimate, epicitem.issues_with_points, epicitem.issues_with_no_points, epicitem.issues_points, sub_labels])    
 
     ws.add_table(table)
