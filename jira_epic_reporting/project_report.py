@@ -11,6 +11,8 @@ from datetime import datetime
 from epic import Epic
 from issue import Issue
 from sprint import Sprint
+import excel_util
+import claude_util
 
 start_time = datetime.now()
 start_time_format = start_time.strftime("%m/%d/%Y, %H:%M:%S")
@@ -194,21 +196,31 @@ def create_excel(label, other_links, ai_out):
     workbook = openpyxl.Workbook()
     worksheet_summary = workbook.active
     worksheet_summary.title = "Summary"
-    worksheet_epics = workbook.create_sheet("Epics")
-    worksheet_issues = workbook.create_sheet("Issues")
-    worksheet_ai = workbook.create_sheet("Epic Health")
+    worksheet_epics = workbook.create_sheet("All Epics")
+    worksheet_issues = workbook.create_sheet("All Issues")
+    
 
     # Create the Summary Tab
-    Epic.excel_worksheet_summary(worksheet_summary, epics, label, create_date, other_links)
+    excel_util.excel_worksheet_summary(worksheet_summary, epics, label, create_date, other_links)
 
     # Create the Epic Tab
-    Epic.excel_worksheet_create(worksheet_epics, epics, jira_issue_link,label)
+    excel_util.excel_worksheet_create_epics(worksheet_epics, epics, jira_issue_link,label)
 
     # Create the Issue Tab
-    Issue.excel_worksheet_create(worksheet_issues, epics, jira_issue_link)
+    excel_util.excel_worksheet_create_issues(worksheet_issues, epics, jira_issue_link, "TableAllIssues")
+
+    # Create the Sub Label Tabs
+    sub_labels = excel_util.get_project_sub_labels(epics, label)
+    for sub_label in sub_labels:
+        sheet_epics = excel_util.get_epics_with_sub_label(epics, sub_label)
+        if len(sheet_epics) > 0:
+            worksheet_sub_label = workbook.create_sheet(sub_label)
+            excel_util.excel_worksheet_create_issues(worksheet_sub_label, sheet_epics, 
+                                                     jira_issue_link, f"Table{sub_label}Issues")
 
     if ai_out:
-        Epic.excel_worksheet_ai_create(worksheet_ai, epics, jira_issue_link, claudekey)
+        worksheet_ai = workbook.create_sheet("Epic Health")
+        claude_util.excel_worksheet_ai_create(worksheet_ai, epics, jira_issue_link, claudekey)
 
     return workbook
 
@@ -274,10 +286,3 @@ if __name__ == '__main__':
     parser.add_argument("-a", "--ai", help="Use Description and Comments for Epic Health", action="store_true")
     args = parser.parse_args()
     main(args)
-
-# python3 project_report.py --label ReviewMarketing --console --file reviewmarketing.txt
-
-# python3 project_report.py --label ReviewMarketing --console --file reviewmarketing.txt --ai
-
-# One Drive Location:
-# https://revlocalinc-my.sharepoint.com/:f:/g/personal/jholmes_revlocal_com/EiR1Aui9R9ZEirrVwyOyLeIBHfm2fngUvXbFNcD-nczL3w?e=o8o1le

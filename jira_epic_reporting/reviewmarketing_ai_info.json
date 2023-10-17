@@ -1,0 +1,47 @@
+{
+    "project": "Info on the project and specific information
+    The review marketing project was kicked off with engineering on October 6th after months of product research and 
+    creating documentaiton on the requirements.  The Arr team started discovert work on the project on October 11th.
+
+    UX stuff
+
+
+    ",
+    "epics":    "Epics are large bodies of work that are broken down into smaller stories. Each epic is given a story point estimate to represent its complexity and uncertainty.
+    If the estimate is zero than there isn’t an estimate yet.  If there are zero or very minimal stories that complete the description of the epic, then the epic is not well defined.
+    Given that the estimate for an epic is all relative to just this particular project, we start with a baseline estimation.
+    The baseline story point scale is:
+    1 point - Minimal complexity. Can be completed in 1 sprint.
+    2 points - Low complexity. Can be done in 1-2 sprints.
+    3 points - Moderate complexity. May take 2-4 sprints. Some unknowns.
+    5 points - High complexity. Likely 3-7 sprints. Significant unknowns and risk.
+    8 points - Very high complexity. Could take 5-13 sprints. Involves new technology or capabilities. High risk.
+    13 points - Extremely high complexity. May take 8-20 sprints. Massive unknowns and uncertainty.
+    Points are to represent complexity and not time, but time is what is understood across all disciplines such as engineering, product and executives.  So to bridge the complexity and time gap we use an estimate of sprints. 
+    Sprints are 2 weeks. The team capacity per sprint is around 30 story points for Team A and 25 for Team B. . These are not related to epic points.
+    Higher point estimates indicate more uncertainty and risk. Epics estimated at 8+ points should have extra progress monitoring.
+    Once an epic is complete, we compare the actual effort to the estimate. This helps recalibrate estimates for remaining epics.
+    Epics with very high estimates (13+ points) have extreme uncertainty. Consider reducing scope, doing spikes, or changing the approach altogether.
+    The epic description will have <description> tag and there is only one description
+    The epic's comments will have <comment> tags and there could be multiple comments
+
+    ",
+    "stories":  "Info on the stories and specific information
+    
+    A Story will have a <story> tag.
+    Inside the story tag there is a <storydescription> tag 
+    Inside the story tag there is a <storycomments> tag
+    Inside the story tag there is a <storypoints> tag
+    Inside the story tag there is a <storystatus> tag
+    ",
+    "action": "
+    Carefully review the epic description and baseline criteria. 
+    Make sure you understand the overall scope and goals of the epic.
+    what is the evaluation of the Epic as it pertains to the project. 
+    If there is not a given estimate on the epic, provide an estimate you believe it will take 
+    given the epic basline criteria and the information in the epic and stories provided.  
+    If there are outstanding uestions, summerize these questions for concise and actionable feedback.
+    
+    Present recommendations on how to address unclear aspects and next steps.
+    "
+}
