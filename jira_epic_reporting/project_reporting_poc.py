@@ -6,7 +6,7 @@ from openpyxl.utils import get_column_letter
 from colorama import init, Fore, Back, Style
 from dotenv import load_dotenv
 from datetime import datetime
-import epic
+import objects.epic as epic
 
 start_time = datetime.now()
 start_time_format = start_time.strftime("%m/%d/%Y, %H:%M:%S")

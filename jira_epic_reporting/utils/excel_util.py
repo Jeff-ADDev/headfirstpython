@@ -1,6 +1,6 @@
 
 from typing import List
-from issue import Issue
+from objects.issue import Issue
 from colorama import init, Fore, Back, Style
 from datetime import datetime
 from openpyxl import Workbook
@@ -8,9 +8,9 @@ from openpyxl.worksheet.hyperlink import Hyperlink
 from openpyxl.worksheet.table import Table, TableStyleInfo
 from openpyxl.styles import Font, Alignment, numbers
 from openpyxl.utils import get_column_letter, quote_sheetname
-import jira_utils
+import utils.jira_utils as jira_utils
 import console_util
-import claude_util
+import utils.claude_util as claude_util
 
 def get_project_sub_labels(epics, project_label):
     sub_labels = []

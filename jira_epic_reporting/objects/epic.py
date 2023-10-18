@@ -1,5 +1,5 @@
 from typing import List
-from issue import Issue
+from objects.issue import Issue
 from colorama import init, Fore, Back, Style
 from datetime import datetime
 from openpyxl import Workbook

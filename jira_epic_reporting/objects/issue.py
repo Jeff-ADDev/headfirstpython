@@ -1,6 +1,6 @@
 from typing import List
 from colorama import init, Fore, Back, Style
-from sprint import Sprint
+from objects.sprint import Sprint
 from datetime import datetime
 from openpyxl import load_workbook
 from openpyxl.worksheet.table import Table, TableStyleInfo

@@ -1,5 +1,5 @@
 from typing import List
-from issue import Issue
+from objects.issue import Issue
 from colorama import init, Fore, Back, Style
 from datetime import datetime
 from openpyxl import Workbook
@@ -8,8 +8,8 @@ from openpyxl.worksheet.table import Table, TableStyleInfo
 from openpyxl.styles import Font, Alignment, numbers
 from openpyxl.utils import get_column_letter, quote_sheetname
 from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
-import jira_utils
-import excel_util
+import utils.jira_utils as jira_utils
+import utils.excel_util as excel_util
 
 def excel_worksheet_ai_create(ws, epics, jira_issue_link, claude_ai_key):
     # Evaluating the description and comments, please answer the following questions:

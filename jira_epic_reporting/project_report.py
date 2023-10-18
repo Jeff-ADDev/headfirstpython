@@ -8,12 +8,12 @@ from openpyxl.utils import get_column_letter
 from colorama import init, Fore, Back, Style
 from dotenv import load_dotenv
 from datetime import datetime
-from epic import Epic
-from issue import Issue
-from sprint import Sprint
-import excel_util
-import claude_util
-import jira_utils
+from objects.epic import Epic
+from objects.issue import Issue
+from objects.sprint import Sprint
+import utils.excel_util as excel_util
+import utils.claude_util as claude_util
+import utils.jira_utils as jira_utils
 import console_util
 
 load_dotenv()
@@ -65,13 +65,24 @@ def jira_project_label_reporting(args):
     save_excel_file = date_file_info + " Project " + project_label + " Details.xlsx"
     console_util.save_excel_file(path_location, save_excel_file, wb)
     
-    
     if con_out:
         jira_utils.output_console(epics)  
+
+def jira_boards_sprint_reporting(args):
+    print("Getting Board and Sprint Information")
+
+def jira_people_reporting(args):
+    print("Getting People Information")
 
 def main(args):
     if args.label:
         jira_project_label_reporting(args)
+    elif args.info:
+        jira_boards_sprint_reporting(args)
+    elif args.people:
+        jira_people_reporting(args)
+    else:  
+        print("Please provide a proper argument for the program")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Create Excel Sheet for Project Reporting")
@@ -79,5 +90,7 @@ if __name__ == '__main__':
     parser.add_argument("-c", "--console", help="Enable Console Output", action="store_true")
     parser.add_argument("-f", "--file", help="File name for reporting links")
     parser.add_argument("-a", "--ai", help="Use Description and Comments for Epic Health", action="store_true")
+    parser.add_argument("-i", "--info", help="Get Boards and Sprints Information", action="store_true")
+    parser.add_argument("-p", "--people", help="Get information on people", action="store_true")
     args = parser.parse_args()
     main(args)

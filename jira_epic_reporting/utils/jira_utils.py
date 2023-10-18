@@ -8,12 +8,12 @@ from openpyxl.utils import get_column_letter
 from colorama import init, Fore, Back, Style
 from dotenv import load_dotenv
 from datetime import datetime
-from issue import Issue
-from sprint import Sprint
-import excel_util
-import claude_util
+from objects.issue import Issue
+from objects.sprint import Sprint
+import utils.excel_util as excel_util
+import utils.claude_util as claude_util
 import console_util
-from epic import Epic
+from objects.epic import Epic
 
 def test_zero_value(value, cell):
     if value == 0:
