@@ -25,6 +25,7 @@ url_location = os.getenv("JIRA_REV_LOCATION")
 url_search = os.getenv("JIRA_SEARCH")
 url_board = os.getenv("JIRA_BOARD")
 url_issue = os.getenv("JIRA_ISSUE")
+url_users = os.getenv("JIRA_USERS")
 path_location = os.getenv("PATH_LOCATION")
 project_label = os.getenv("PROJECT_LABEL")
 jira_issue_link = os.getenv("JIRA_ISSUE_LINK")
@@ -60,7 +61,7 @@ def jira_project_label_reporting(args):
     if ai_out:
         jira_utils.get_comments(epics, con_out, url_location, url_issue, header)
 
-    wb = excel_util.create_excel(epics, project_label, other_links, 
+    wb = excel_util.create_label_excel_report(epics, project_label, other_links, 
         ai_out, create_date, jira_issue_link, claudekey)
     save_excel_file = date_file_info + " Project " + project_label + " Details.xlsx"
     console_util.save_excel_file(path_location, save_excel_file, wb)
@@ -69,7 +70,25 @@ def jira_project_label_reporting(args):
         jira_utils.output_console(epics)  
 
 def jira_boards_sprint_reporting(args):
-    print("Getting Board and Sprint Information")
+    con_out = False
+    if args.console:
+        con_out = True
+    start_time = datetime.now()
+    start_time_format = start_time.strftime("%m/%d/%Y, %H:%M:%S")
+    date_file_info = start_time.strftime("%Y_%m_%d")
+    create_date = start_time.strftime("%m/%d/%Y")
+    
+    board_issues = f"{url_location}/{url_board}"
+    users_issues = f"{url_location}/{url_users}"
+    header = {"Authorization": "Basic " + jirakey}
+
+    all_boards = jira_utils.get_boards(con_out, board_issues, header)
+    all_sprints = jira_utils.get_sprints(con_out, all_boards, url_location, header)
+    all_users = jira_utils.get_users(con_out, users_issues, header)
+
+    wb = excel_util.create_jira_info_report(all_boards, all_sprints, all_users)
+    save_excel_file = date_file_info + " Jira Info.xlsx"
+    console_util.save_excel_file(path_location, save_excel_file, wb)
 
 def jira_people_reporting(args):
     print("Getting People Information")

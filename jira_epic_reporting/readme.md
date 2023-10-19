@@ -15,6 +15,14 @@ ReviewMarketing Label with Console Output and Links in review_marketing.txt and 
 python3 project_report.py --label ReviewMarketing --console --file review_marketing.txt --ai
 ```
 
+## Command Line for Jira Information
+
+Will get all boards and sprints in Jira
+
+```
+python3 project_report.py --info
+```
+
 ### Example .env file
 
 ```
@@ -28,10 +36,31 @@ PATH_LOCATION=/Users/jholmes/Library/CloudStorage/OneDrive-RevLocal/reviewmarket
 JIRA_ISSUE_LINK=https://revlocaldev.atlassian.net/browse/
 ```
 
-
 [One Drive Output Location](https://revlocalinc-my.sharepoint.com/:f:/g/personal/jholmes_revlocal_com/EiR1Aui9R9ZEirrVwyOyLeIBHfm2fngUvXbFNcD-nczL3w?e=o8o1le)
+
+## PDF File
+
+[Real Python PDF Files](https://realpython.com/creating-modifying-pdf/)
 
 ### Claude
 
 [Claude Prompt Chaining](https://docs.anthropic.com/claude/docs/prompt-chaining)
 
+### Install Items for reporting
+
+Excel
+openpyxl
+
+Console Color Ouput
+colorama
+
+Environment Variables
+dotenv
+
+Object Typing
+typing
+
+Claude Usage
+anthropic
+
+PDF Creation

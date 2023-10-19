@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 from datetime import datetime
 from objects.issue import Issue
 from objects.sprint import Sprint
+from objects.board import Board
+from objects.user import User
 import utils.excel_util as excel_util
 import utils.claude_util as claude_util
 import console_util
@@ -21,9 +23,10 @@ def test_zero_value(value, cell):
     else:
         cell.value = value
 
-# Retrieve all epics from main project label
-# Get Sub labels to help break down the epics
 def get_epics(project_label, con_out, main_search, header):
+    """
+    Retrieve all epics from main project label
+    """
     epics = []
     console_util.terminal_update("Retrieving Epics", " - ", False)
     all_epics = main_search + "'issuetype'='Epic' AND 'labels' in ('" + project_label + "')"
@@ -46,30 +49,10 @@ def get_epics(project_label, con_out, main_search, header):
         if con_out:
             print(Fore.RED + "Failed - All Epics" + Style.RESET_ALL)
 
-# Retrieve all the issues attached to the epics
-# JSON Issue
-# issues
-#      id - 12345                                           id
-#      key - ARR-2392                                       key
-#      fields
-#            summary - "Create a new project report"        summary
-#            customfield_10032 - 5 Points                   size  
-#            customfield_10010 - Sprint[]                   sprint[]
-#            status
-#                  name - "In Progress"                     status
-#            priority
-#                  name - "Medium"                          priority
-#            issuetype
-#                  name - "Story"                           issuetype
-#            project
-#                  name - "Agile RevSite Raider$"           project_name
-#                  key - "ARR"                              project_key
-#            assignee
-#                  displayName - "John Doe"                 assignee_displayName
-#            created - "2021-03-01T15:00:00.000-0400        created
-#            updated - "2021-03-01T15:00:00.000-0400        updated
-#            description - "This is a description"          description
 def get_issues(epics, main_search, header):
+    """
+    Get all issues that are part of the epics
+    """
     issues_with_points = 0
     issues_points = 0
     issues_with_no_points = 0
@@ -119,6 +102,9 @@ def get_issues(epics, main_search, header):
                 epicitem.set_issues_with_no_points(issues_with_no_points)
 
 def get_comments(epics, con_out,url_location, url_issue, header):
+    """
+    Get Epic Item Comments
+    """
     console_util.terminal_update("Retrieving Comments", " - ", False)
     for epicitem in epics:
         #https://revlocaldev.atlassian.net/rest/api/2/issue/ARR-2392/comment
@@ -129,11 +115,117 @@ def get_comments(epics, con_out,url_location, url_issue, header):
             for commentitem in data["comments"]:
                 epicitem.add_comment(commentitem["body"])
 
-# Console Output Information
 def output_console(epics):
+    """
+    Output all information to console
+    """
     for epicitem in epics:
         epicitem.print_epic()
         for issueitem in epicitem.issues:
             issueitem.print_issue()
             for sprintitem in issueitem.sprint:
                 sprintitem.print_sprint()
+
+def get_boards(con_out, board_info, header):
+    """
+    Get all boards from Jira
+    """
+    console_util.terminal_update("Retrieving Boards", " - ", False)
+    temp_boards = []
+    # https://revlocaldev.atlassian.net/rest/agile/1.0/board
+    response = requests.get(board_info, headers=header)
+    if response.status_code == 200:
+        data = response.json()
+        for boarditem in data["values"]:
+            temp_boards.append(Board(boarditem["id"], boarditem["name"], boarditem["type"]))
+            #temp_boards[boarditem["id"]] = f"{boarditem['name']}|{boarditem['type']}"
+            # print(f"ID - {boarditem['id']} - Name - {boarditem['name']} - Type - {boarditem['type']}")
+            # location
+            #           projectId
+            #           name
+            #           projectKey
+            #           projectTypeKey
+            #           displayName
+            #           projectNmae
+        if con_out: 
+            print(Fore.GREEN + f"Success! - Board Info" + Style.RESET_ALL)
+        return temp_boards
+    else:
+        if con_out:
+            print(Fore.RED + "Failed - All Boards Info" + Style.RESET_ALL)
+
+def get_sprints(con_out, temp_boards, url_location, header):
+    """
+    Get all sprints from Jira
+    """
+    count = 0
+    all_sprints = []
+    for boarditem in temp_boards:
+        start_location = 0
+        count_boarditem_sprints = 0
+        has_more_sprints = True
+        while (has_more_sprints):
+            console_util.terminal_busy("Retrieving Sprints", count)
+            count += 1
+            if count > 3:
+                count = 0
+            sprint_info = f"{url_location}/rest/agile/1.0/board/{boarditem.id}/sprint?maxResults=50&startAt={start_location}"
+            response = requests.get(sprint_info, headers=header)
+            if response.status_code == 200:
+                data = response.json()
+                for sprintitem in data["values"]:
+                    new_sprint = Sprint(sprintitem["id"], sprintitem["name"], boarditem.id, sprintitem["state"])
+                    # TODO: Check that these dates are getting set and working oaky, move date handling to console_util
+                    try: 
+                        new_sprint.set_start_date(sprintitem["startDate"])
+                    except:
+                        pass
+                    try:
+                        new_sprint.set_end_date(sprintitem["endDate"])
+                    except:
+                        pass
+                    try: 
+                        new_sprint.set_complete_date(sprintitem["completeDate"])
+                    except:
+                        pass
+                    all_sprints.append(new_sprint)
+                    #temp_sprints[sprintitem["id"]] = f"{boarditem}|{count_boarditem_sprints}|{sprintitem['name']}|{sprintitem['state']}|{sprintitem['startDate']}|{sprintitem['endDate']}"
+                    count_boarditem_sprints += 1
+
+                if len(data["values"]) == 50:
+                    has_more_sprints = True
+                    start_location += 50
+                else:
+                    has_more_sprints = False
+            else:
+                has_more_sprints = False
+    if con_out:
+        print(Fore.GREEN + f"Success! - Sprint Info " + Style.RESET_ALL)
+    else:
+        if con_out:
+            print(Fore.RED + "Failed - All Sprint Info" + Style.RESET_ALL)
+    
+    return all_sprints
+
+def get_users(con_out, url, header):
+    """
+    Get All Users from Jira
+    """
+    console_util.terminal_update("Retrieving Users", " - ", False)
+    all_users = []
+    response = requests.get(url, headers=header)
+    if response.status_code == 200:
+        data = response.json()
+        for useritem in data:
+            email = ""
+            try:
+                email = useritem["emailAddress"]
+            except:
+                pass
+            all_users.append(User(useritem["accountId"], email, useritem["displayName"], useritem["active"]))
+        if con_out:
+            print(Fore.GREEN + f"Success! - Users Info" + Style.RESET_ALL)
+        return all_users
+    else:
+        if con_out:
+            print(Fore.RED + "Failed - Users Info" + Style.RESET_ALL)

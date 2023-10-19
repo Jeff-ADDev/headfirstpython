@@ -9,6 +9,20 @@ def terminal_update(message, data, bold):
     else:
         print(Fore.GREEN + Style.BRIGHT + f"  {message}: " + Fore.BLUE + Style.NORMAL + f" {data} " + Style.RESET_ALL, end="\r")
 
+def terminal_busy(message, count):
+    if count > 3:
+        count = 0
+    data = ""
+    if count == 0:
+        data = "|"
+    elif count == 1:
+        data = "/"
+    elif count == 2:
+        data = "-"
+    elif count == 3:
+        data = "\\"
+    print(Fore.GREEN + Style.BRIGHT + f"  {message}: " + Fore.BLUE + Style.NORMAL + f" {data} " + Style.RESET_ALL, end="\r")
+
 def save_excel_file(path, filename, wb):
     """
     Save the Excel File given the path and filename, along with the workbook

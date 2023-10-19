@@ -368,7 +368,7 @@ def excel_worksheet_create_issues(ws, epics, jira_issue_link, table_name):
         cell = row[11] # zeor based index
         cell.alignment = Alignment(horizontal="center", vertical="center")
 
-def create_excel(epics, label, other_links, ai_out, create_date, jira_issue_link, claudekey):
+def create_label_excel_report(epics, label, other_links, ai_out, create_date, jira_issue_link, claudekey):
     console_util.terminal_update("Creating Excel Document", " - ", False)
     workbook = Workbook()
     worksheet_summary = workbook.active
@@ -400,3 +400,111 @@ def create_excel(epics, label, other_links, ai_out, create_date, jira_issue_link
         claude_util.excel_worksheet_ai_create(worksheet_ai, epics, jira_issue_link, claudekey)
 
     return workbook
+
+def create_jira_info_report(boards, sprints, users):
+    console_util.terminal_update("Creating Jira Excel Document", " - ", False)
+    workbook = Workbook()
+    worksheet_boards = workbook.active
+    worksheet_boards.title = "Boards"
+    worksheet_sprints = workbook.create_sheet("All Sprints")
+    worksheet_users = workbook.create_sheet("Users")
+    excel_boards(worksheet_boards, boards)
+    excel_sprints(worksheet_sprints, sprints)
+    excel_users(worksheet_users, users)
+    return workbook
+
+def excel_boards(ws, boards):
+    ws.column_dimensions["A"].width = 20
+    ws.column_dimensions["B"].width = 35
+    ws.column_dimensions["C"].width = 25
+    
+    table = Table(displayName="TableBoards", ref="A1:C" + str(len(boards) + 1))
+    style = TableStyleInfo(name="TableStyleMedium9", showFirstColumn=False,
+                        showLastColumn=False, showRowStripes=True, showColumnStripes=False)
+    table.tableStyleInfo = style
+
+    ws.append(["Board ID", "Board Name", "Board Type"])
+    for board in boards:
+        ws.append([board.id,board.name,board.type])
+
+    ws.add_table(table)
+
+    for row in ws[1:ws.max_row]:  # Include The Header
+        cell = row[0] # zeor based index
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+    
+    for row in ws[2:ws.max_row]:  # Include The Header
+        cell = row[1] # zeor based index
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+
+    for row in ws[3:ws.max_row]:  # Include The Header
+        cell = row[1] # zeor based index
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+
+def excel_sprints(ws, sprints):
+    ws.column_dimensions["A"].width = 15
+    ws.column_dimensions["B"].width = 15
+    ws.column_dimensions["C"].width = 40
+    ws.column_dimensions["D"].width = 15
+
+    ws.append(["Sprint ID", "Board ID", "Name", "State"])
+    
+    table = Table(displayName="TableSprints", ref="A1:D" + str(len(sprints) + 1))
+    style = TableStyleInfo(name="TableStyleMedium9", showFirstColumn=False,
+                        showLastColumn=False, showRowStripes=True, showColumnStripes=False)
+    table.tableStyleInfo = style
+
+    for sprint in sprints:
+        ws.append([sprint.id, sprint.boardID, sprint.name, sprint.state])
+
+    ws.add_table(table)
+    
+    for row in ws[1:ws.max_row]:  # Include The Header
+        cell = row[0] # zeor based index
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+    
+    for row in ws[1:ws.max_row]:  # Include The Header
+        cell = row[1] # zeor based index
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+
+    for row in ws[1:ws.max_row]:  # Include The Header
+        cell = row[2] # zeor based index
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+    
+    for row in ws[1:ws.max_row]:  # Include The Header
+        cell = row[3] # zeor based index
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+
+def excel_users(ws, users):
+    ws.column_dimensions["A"].width = 25
+    ws.column_dimensions["B"].width = 15
+    ws.column_dimensions["C"].width = 30
+    ws.column_dimensions["D"].width = 70
+
+    ws.append(["Name", "Active", "email", "ID"])
+
+    table = Table(displayName="TableUsers", ref="A1:D" + str(len(users) + 1))
+    style = TableStyleInfo(name="TableStyleMedium9", showFirstColumn=False,
+                        showLastColumn=False, showRowStripes=True, showColumnStripes=False)
+    table.tableStyleInfo = style
+
+    for user in users:
+        ws.append([user.name, user.active, user.email, user.id])
+
+    ws.add_table(table)
+
+    for row in ws[1:ws.max_row]:  # Include The Header
+        cell = row[0] # zeor based index
+        cell.alignment = Alignment(horizontal="left", vertical="center")
+    
+    for row in ws[1:ws.max_row]:  # Include The Header
+        cell = row[1] # zeor based index
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+
+    for row in ws[1:ws.max_row]:  # Include The Header
+        cell = row[2] # zeor based index
+        cell.alignment = Alignment(horizontal="left", vertical="center")
+    
+    for row in ws[1:ws.max_row]:  # Include The Header
+        cell = row[3] # zeor based index
+        cell.alignment = Alignment(horizontal="left", vertical="center")
