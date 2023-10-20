@@ -23,8 +23,8 @@ class Sprint:
         
     def print_sprint(self):
         print_completeDate = ""
-        if self.completeDate != "":
-            print_completeDate = "Complete: " + str(self.completeDate.month) + "/" + str(self.completeDate.day) + "/" + str(self.completeDate.year)
+        if self.complete_date != "":
+            print_completeDate = "Complete: " + str(self.complete_date.month) + "/" + str(self.complete_date.day) + "/" + str(self.complete_date.year)
         
         print(Fore.GREEN + Style.BRIGHT + 
               "    " + Fore.WHITE + self.name + " " + Style.DIM + str(self.id) + Fore.BLUE + Style.BRIGHT + " Board: " + str(self.boardID) + 

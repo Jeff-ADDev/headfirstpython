@@ -49,7 +49,7 @@ def get_epics(project_label, con_out, main_search, header):
         if con_out:
             print(Fore.RED + "Failed - All Epics" + Style.RESET_ALL)
 
-def get_issues(epics, main_search, header):
+def get_issues(epics, main_search, issue_comments,header):
     """
     Get all issues that are part of the epics
     """
@@ -96,6 +96,9 @@ def get_issues(epics, main_search, header):
                         issue_add.add_sprint(add_sprint)
                 except:
                     pass
+                    
+                get_changelogs(issue_comments, issue_add, header)
+
                 epicitem.add_issue(issue_add)
                 epicitem.set_issues_with_points(issues_with_points)
                 epicitem.set_issues_points(issues_points)
@@ -229,3 +232,14 @@ def get_users(con_out, url, header):
     else:
         if con_out:
             print(Fore.RED + "Failed - Users Info" + Style.RESET_ALL)
+
+def get_changelogs(url, issue, header):
+    """
+    Get All Change Logs from Jira
+    """
+    all_logs = f"{url}{issue.key}/changelog"
+    response = requests.get(all_logs, headers=header)
+    if response.status_code == 200:
+        data = response.json()
+        for change in data["values"]:
+            print(f"{change['id']} - {change['created']}")
