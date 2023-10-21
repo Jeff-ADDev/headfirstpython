@@ -7,9 +7,9 @@ from openpyxl.worksheet.hyperlink import Hyperlink
 from openpyxl.worksheet.table import Table, TableStyleInfo
 from openpyxl.styles import Font, Alignment, numbers
 from openpyxl.utils import get_column_letter, quote_sheetname
-import utils.jira_utils as jira_utils
 import console_util
 import utils.claude_util as claude_util
+from utils.jira_obj import Jira
 
 class Excel:
     def __init__(self, claudekey, project_label,jira_issue_link, create_date, ai_out, other_links):
@@ -128,14 +128,14 @@ class Excel:
         ws["A9"] = "Max Estimate"
         ws["A10"] = "Min Estimate"
 
-        jira_utils.test_zero_value(epic_total, ws["B4"])
-        jira_utils.test_zero_value(epic_estimate_total, ws["B5"])
-        jira_utils.test_zero_value(epic_with_estimate, ws["B6"])
-        jira_utils.test_zero_value(epic_percent_with_estimate, ws["B7"])
+        Jira.test_zero_value(epic_total, ws["B4"])
+        Jira.test_zero_value(epic_estimate_total, ws["B5"])
+        Jira.test_zero_value(epic_with_estimate, ws["B6"])
+        Jira.test_zero_value(epic_percent_with_estimate, ws["B7"])
         ws["B7"].number_format = numbers.FORMAT_PERCENTAGE_00
-        jira_utils.test_zero_value(epic_estimate_avg, ws["B8"])
-        jira_utils.test_zero_value(epic_estimate_max, ws["B9"])
-        jira_utils.test_zero_value(epic_estimate_min, ws["B10"])
+        Jira.test_zero_value(epic_estimate_avg, ws["B8"])
+        Jira.test_zero_value(epic_estimate_max, ws["B9"])
+        Jira.test_zero_value(epic_estimate_min, ws["B10"])
         
         for row in ws[4:ws.max_row]:  # 1 Based Index
             cell = row[1] # zeor based index
@@ -158,14 +158,14 @@ class Excel:
         ws["C9"] = "Max Estimate"
         ws["C10"] = "Min Estimate"
 
-        jira_utils.test_zero_value(issue_total, ws["D4"])
-        jira_utils.test_zero_value(issue_estimate_total, ws["D5"])
-        jira_utils.test_zero_value(issue_with_estimate, ws["D6"])
-        jira_utils.test_zero_value(issue_percent_with_estimate, ws["D7"])
+        Jira.test_zero_value(issue_total, ws["D4"])
+        Jira.test_zero_value(issue_estimate_total, ws["D5"])
+        Jira.test_zero_value(issue_with_estimate, ws["D6"])
+        Jira.test_zero_value(issue_percent_with_estimate, ws["D7"])
         ws["D7"].number_format = numbers.FORMAT_PERCENTAGE_00
-        jira_utils.test_zero_value(issue_estimate_avg, ws["D8"])
-        jira_utils.test_zero_value(issue_estimate_max, ws["D9"])
-        jira_utils.test_zero_value(issue_estimate_min, ws["D10"])
+        Jira.test_zero_value(issue_estimate_avg, ws["D8"])
+        Jira.test_zero_value(issue_estimate_max, ws["D9"])
+        Jira.test_zero_value(issue_estimate_min, ws["D10"])
 
         for row in ws[4:ws.max_row]:  # 1 Based Index
             cell = row[3] # zeor based index
@@ -415,9 +415,9 @@ class Excel:
         worksheet_boards.title = "Boards"
         worksheet_sprints = workbook.create_sheet("All Sprints")
         worksheet_users = workbook.create_sheet("Users")
-        excel_boards(worksheet_boards, boards)
-        excel_sprints(worksheet_sprints, sprints)
-        excel_users(worksheet_users, users)
+        self.excel_boards(worksheet_boards, boards)
+        self.excel_sprints(worksheet_sprints, sprints)
+        self.excel_users(worksheet_users, users)
         return workbook
 
     def excel_boards(self, ws, boards):

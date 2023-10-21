@@ -33,9 +33,6 @@ class Jira:
         else:
             cell.value = value
 
-    def printme(self):
-        print("I am here")
-
     def get_epics(self):
         """
         Retrieve all epics from main project label
@@ -120,7 +117,7 @@ class Jira:
                     epicitem.set_issues_points(issues_points)
                     epicitem.set_issues_with_no_points(issues_with_no_points)
 
-    def get_comments(epics):
+    def get_comments(self, epics):
         """
         Get Epic Item Comments
         """

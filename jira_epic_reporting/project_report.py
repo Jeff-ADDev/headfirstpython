@@ -9,15 +9,8 @@ from colorama import init, Fore, Back, Style
 from dotenv import load_dotenv
 from datetime import datetime
 from objects.epic import Epic
-from objects.issue import Issue
-from objects.sprint import Sprint
-# import utils.excel_util as excel_util
-import utils.claude_util as claude_util
-# import utils.jira_utils as jira_utils
 from utils.jira_obj import Jira
-#import utils.jira_obj as jira_obj
 from utils.excel_obj import Excel
-#import utils.excel_obj as excel_obj
 import console_util
 
 load_dotenv()
@@ -25,32 +18,19 @@ init() # Colorama
 
 def jira_project_label_reporting(jira, excel, ai_out, date_file_info, path_location, con_out, project_label):
     epics: List[Epic] = []  
-    #main_search = f"{url_location}/{url_search}"
-    # header = {"Authorization": "Basic " + jirakey}
-    #baord_issues = f"{url_location}/{url_board}"
-    #issue_comments = f"{url_location}/{url_issue}"
 
-    #epics = jira_utils.get_epics(project_label, con_out, main_search, header)
-    print(f"Getting Epics for {jira}")
-    jira.printme()
     epics = jira.get_epics()
     jira.get_issues(epics)
-
-    #jira_utils.get_issues(epics, main_search, issue_comments, header)
     
     if ai_out:
         jira.get_comments(epics)
-        #jira_utils.get_comments(epics, con_out, url_location, url_issue, header)
 
     wb = excel.create_label_excel_report(epics)
-    #wb = excel_util.create_label_excel_report(epics, project_label, other_links, 
-    #    ai_out, create_date, jira_issue_link, claudekey)
     save_excel_file = date_file_info + " Project " + project_label + " Details.xlsx"
     console_util.save_excel_file(path_location, save_excel_file, wb)
     
     if con_out:
         jira.output_console(epics)
-        #jira_utils.output_console(epics)  
 
 def jira_boards_sprint_reporting(jira, excel, path_location):
 
