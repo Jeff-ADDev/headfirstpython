@@ -72,7 +72,7 @@ class Excel:
                 epic_estimate_total += epicitem.estimate
                 if epicitem.estimate > epic_estimate_max:
                     epic_estimate_max = epicitem.estimate
-                if epicitem.estimate < epic_estimate_min:
+                if epicitem.estimate < epic_estimate_min or epic_estimate_min == 0:
                     epic_estimate_min = epicitem.estimate
             for issueitem in epicitem.issues:
                 issue_total += 1
@@ -81,7 +81,7 @@ class Excel:
                     issue_estimate_total += issueitem.size
                     if issueitem.size > issue_estimate_max:
                         issue_estimate_max = issueitem.size
-                    if issueitem.size < issue_estimate_min:
+                    if issueitem.size < issue_estimate_min or issue_estimate_min == 0:
                         issue_estimate_min = issueitem.size
         if epic_estimate_total > 0:
             epic_estimate_avg = epic_estimate_total / epic_with_estimate
@@ -216,7 +216,8 @@ class Excel:
         ws.add_table(table)
 
         # Format Data
-        for row in ws[2:ws.max_row]:  # Exclude The Header
+        
+        for row in ws[1:ws.max_row]:  # Exclude The Header
             cell = row[0] # zeor based index
             value_use = cell.value
             cell.hyperlink = f"{self.jira_issue_link}{value_use}"
@@ -227,11 +228,11 @@ class Excel:
             cell = row[0] # zeor based index
             cell.alignment = Alignment(horizontal="center", vertical="center")
 
-        for row in ws[2:ws.max_row]:  # skip the header
+        for row in ws[1:ws.max_row]:  # skip the header
             cell = row[1] # zeor based index
             cell.alignment = Alignment(wrap_text=True)
             cell.number_format = "text"
-
+            
         for row in ws[1:ws.max_row]:  # Include The Header
             cell = row[2] # zeor based index
             cell.alignment = Alignment(horizontal="center", vertical="center")
@@ -318,7 +319,7 @@ class Excel:
 
         ws.add_table(table_issues)
 
-        for row in ws[2:ws.max_row]:  # Exclude The Header
+        for row in ws[1:ws.max_row]:  # Exclude The Header
             cell = row[0] # zeor based index
             value_use = cell.value
             cell.hyperlink = f"{self.jira_issue_link}{value_use}"
@@ -365,7 +366,7 @@ class Excel:
             cell = row[10] # zeor based index
             cell.alignment = Alignment(horizontal="center", vertical="center")
 
-        for row in ws[2:ws.max_row]:  # Exclude The Header
+        for row in ws[1:ws.max_row]:  # Exclude The Header
             cell = row[11] # zeor based index
             value_use = cell.value
             cell.hyperlink = f"{self.jira_issue_link}{value_use}"
@@ -482,7 +483,7 @@ class Excel:
             cell = row[3] # zeor based index
             cell.alignment = Alignment(horizontal="center", vertical="center")
 
-    def excel_users(ws, users):
+    def excel_users(self, ws, users):
         ws.column_dimensions["A"].width = 25
         ws.column_dimensions["B"].width = 15
         ws.column_dimensions["C"].width = 30

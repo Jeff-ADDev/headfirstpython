@@ -15,9 +15,15 @@ ReviewMarketing Label with Console Output and Links in review_marketing.txt and 
 python3 project_report.py --label ReviewMarketing --console --file review_marketing.txt --ai
 ```
 
+Trail Project Label 
+
+```
+python3 project_report.py --label ReportTrial --console --file review_marketing.txt
+```
+
 ## Command Line for Jira Information
 
-Will get all boards and sprints in Jira
+Will get all boards, sprints, users, projects in Jira
 
 ```
 python3 project_report.py --info

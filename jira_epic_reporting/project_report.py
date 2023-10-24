@@ -1,10 +1,5 @@
-import os, requests, sys, argparse
-import openpyxl
+import os, argparse
 from typing import List
-from openpyxl import load_workbook
-from openpyxl.worksheet.table import Table, TableStyleInfo
-from openpyxl.styles import Alignment
-from openpyxl.utils import get_column_letter
 from colorama import init, Fore, Back, Style
 from dotenv import load_dotenv
 from datetime import datetime
@@ -22,15 +17,16 @@ def jira_project_label_reporting(jira, excel, ai_out, date_file_info, path_locat
     epics = jira.get_epics()
     jira.get_issues(epics)
     
+    # Display Console prior to Excel creation
+    if con_out:
+        jira.output_console(epics)
+    
     if ai_out:
         jira.get_comments(epics)
 
     wb = excel.create_label_excel_report(epics)
     save_excel_file = date_file_info + " Project " + project_label + " Details.xlsx"
     console_util.save_excel_file(path_location, save_excel_file, wb)
-    
-    if con_out:
-        jira.output_console(epics)
 
 def jira_boards_sprint_reporting(jira, excel, path_location):
 
@@ -41,15 +37,11 @@ def jira_boards_sprint_reporting(jira, excel, path_location):
 
 
     all_boards = jira.get_boards()
-    #all_boards = jira_utils.get_boards()
     all_sprints = jira.get_sprints(all_boards)
-    #all_sprints = jira_utils.get_sprints(con_out, all_boards, url_location, header)
-    #all_users = jira_utils.get_users(con_out, users_issues, header)
     all_users = jira.get_users()
+    all_projects = jira.get_projects()
 
-    # self, boards, sprints, users)
     wb = excel.create_jira_info_report(all_boards, all_sprints, all_users)
-    # wb = excel_util.create_jira_info_report(all_boards, all_sprints, all_users)
     save_excel_file = date_file_info + " Jira Info.xlsx"
     console_util.save_excel_file(path_location, save_excel_file, wb)
 
@@ -59,7 +51,7 @@ def jira_people_reporting(args):
 def main(args):
     start_time = datetime.now()
     start_time_format = start_time.strftime("%m/%d/%Y, %H:%M:%S")
-    date_file_info = start_time.strftime("%Y_%m_%d")
+    date_file_info = start_time.strftime("%Y %m %d")
     create_date = start_time.strftime("%m/%d/%Y")
 
     jirakey = os.getenv("JIRA_API_KEY")

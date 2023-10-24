@@ -1,17 +1,11 @@
-import os, requests, sys, argparse
-import openpyxl
+import requests
 from typing import List
-from openpyxl import load_workbook
-from openpyxl.worksheet.table import Table, TableStyleInfo
-from openpyxl.styles import Alignment
-from openpyxl.utils import get_column_letter
 from colorama import init, Fore, Back, Style
-from dotenv import load_dotenv
-from datetime import datetime
 from objects.issue import Issue
 from objects.sprint import Sprint
 from objects.board import Board
 from objects.user import User
+from objects.changelog import Changelog
 import console_util
 from objects.epic import Epic
 
@@ -33,6 +27,12 @@ class Jira:
         else:
             cell.value = value
 
+    def check_json(value):
+        if value is None:
+            return "None"
+        else:
+            return value
+
     def get_epics(self):
         """
         Retrieve all epics from main project label
@@ -53,8 +53,6 @@ class Jira:
                     if (label != self.project_label):
                         epic_add.add_sub_label(label)
                 epics.append(epic_add)
-            if self.con_out:
-                print(Fore.GREEN + f"Success! - All Epics {len(epics)}" + Style.RESET_ALL)
             return epics
         else:
             if self.con_out:
@@ -69,7 +67,7 @@ class Jira:
         issues_with_points = 0
         issues_points = 0
         issues_with_no_points = 0
-        count_epics = (len(epics)+1)
+        count_epics = len(epics)
         count_epics_current = 1
         for epicitem in epics:
             console_util.terminal_update("Retrieving Issues on Epics", f"{count_epics_current}/{count_epics}", False)
@@ -139,10 +137,11 @@ class Jira:
             epicitem.print_epic()
             for issueitem in epicitem.issues:
                 issueitem.print_issue()
+                Changelog.print_logs(issueitem, issueitem.changelogs)
                 for sprintitem in issueitem.sprint:
                     sprintitem.print_sprint()
-
-    def get_boards(self, board_info):
+                
+    def get_boards(self):
         """
         Get all boards from Jira
         """
@@ -251,11 +250,103 @@ class Jira:
     def get_changelogs(self, issue):
         """
         Get All Change Logs from Jira
+        Determine number of times 
+            issue went to dev, qa, uat
+            first time to dev, qa, uat
+            amount of time in dev, qa, uat
         """
+        # Values
+        #   id
+        #   author
+        #       accountId
+        #       displayName
+        #       emailAddress
+        #   created
+        #   items
+        #       field
+        #       fieldtype
+        #       fieldId
+        #       from
+        #       fromString
+        #       to
+        #       toString
+
         url = f"{self.url_location}/{self.url_issue}"
         all_logs = f"{url}{issue.key}/changelog"
+        changelogs: List[Changelog] = []
         response = requests.get(all_logs, headers=self.header)
         if response.status_code == 200:
             data = response.json()
             for change in data["values"]:
-                print(f"{change['id']} - {change['created']}")
+                for item in change["items"]:
+                        field = ""
+                        if "field" in item:
+                            field = item["field"]
+                        fieldtype = ""
+                        if "fieldtype" in item:
+                            fieldtype = item["fieldtype"]
+                        fieldId = ""
+                        if "fieldId" in item:
+                            fieldId = item["fieldId"]
+                        itemFrom = ""
+                        if "from" in item:
+                            itemFrom = item["from"]
+                        fromString = ""
+                        if "fromString" in item:
+                            fromString = item["fromString"]
+                        toItem = ""
+                        if "to" in item:
+                            toItem = item["to"]
+                        toString = ""
+                        if "toString" in item:
+                            toString = item["toString"]
+                        emailAddress = ""
+                        if "emailAddress" in change["author"]:
+                            emailAddress = change["author"]["emailAddress"]
+                
+                        changelog = Changelog(change["id"], change["author"]["accountId"], 
+                                        change["author"]["displayName"], emailAddress, 
+                                        change["created"], field, fieldtype, fieldId, 
+                                        itemFrom, fromString, toItem, toString)
+                        
+                        changelogs.append(changelog)
+
+            issue.set_changelogs(changelogs)
+            issue.set_times_to_dev(Changelog.get_total_times(changelogs, "status", "In Development"))
+            issue.set_times_to_qa(Changelog.get_total_times(changelogs, "status", "In QA"))
+            issue.set_times_to_uat(Changelog.get_total_times(changelogs, "status", "UAT"))
+
+            issue.set_first_time_to_dev(Changelog.get_first_time(changelogs, "status", "In Development"))
+            issue.set_first_time_to_qa(Changelog.get_first_time(changelogs, "status", "In QA"))
+            issue.set_first_time_to_uat(Changelog.get_first_time(changelogs, "status", "UAT"))
+
+            issue.set_hours_in_dev(Changelog.get_total_hours(changelogs, "status", "In Development", "In QA"))
+            issue.set_hours_in_qa(Changelog.get_total_hours(changelogs, "status", "Ready For QA", "UAT"))
+            issue.set_hours_in_uat(Changelog.get_total_hours(changelogs, "status", "UAT", "Done"))
+            issue.set_total_hours(Changelog.get_total_hours(changelogs, "status", "In Development", "Done"))
+
+            total_days = 0
+            if float(issue.total_hours) > 0: 
+                days = float(issue.total_hours) / 8
+                total_days = f"{days:.2f}"
+                issue.set_total_days(total_days)
+
+            issue.set_date_done(Changelog.get_last_time(changelogs, "status", "Done"))
+            issue.set_date_ready_dev(Changelog.get_last_time(changelogs, "status", "Ready for Dev"))
+            
+    def get_projects(self):
+        """
+        Get all projects in Jira and the Status Codes
+        """
+        console_util.terminal_update("Retrieving Projects", " - ", False)
+        temp_projects = []
+        project_info = f"{self.url_location}/rest/api/2/project"
+        response = requests.get(project_info, headers=self.header)
+        if response.status_code == 200:
+            data = response.json()
+            for project in data:
+                status_info = f"{self.url_location}/rest/api/2/project/{project['id']}/statuses"
+                if response.status_code == 200:
+                    print(f"ID - {project['id']} - Key - {project['key']} - Name - {project['name']}")
+
+        return temp_projects
