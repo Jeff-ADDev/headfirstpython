@@ -62,6 +62,7 @@ class Issue:
         self.date_ready_dev = ""
         self.total_hours = 0
         self.total_days = 0
+        self.last_pointchange_date = ""
 
     
     def set_status(self, status):
@@ -148,12 +149,18 @@ class Issue:
     def set_total_days(self, total_days):
         self.total_days = total_days
 
+    def set_last_pointchange_date(self, last_pointchange_date):
+        self.last_pointchange_date = last_pointchange_date
+
     def print_issue(self):
         print(Fore.CYAN + Style.BRIGHT + 
               "  Issue-" + self.key + ": " + Fore.CYAN + Style.NORMAL + self.summary 
               + Fore.BLUE + Style.BRIGHT + " (" + str(self.size) + ")" + Style.RESET_ALL)
         print(Fore.WHITE + Style.BRIGHT + 
               "    -------------------   Stats   ------------------ " + Style.RESET_ALL)
+        print(Fore.WHITE + Style.NORMAL + 
+              "    Points Added: " + str(self.last_pointchange_date) + " Size: " + str(self.size) +
+              Style.RESET_ALL)        
         print(Fore.WHITE + Style.NORMAL + 
               "    Ready For Dev: " + str(self.date_ready_dev) +
               Style.RESET_ALL)        

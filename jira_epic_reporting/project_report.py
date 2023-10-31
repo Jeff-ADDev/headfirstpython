@@ -1,4 +1,4 @@
-import os, argparse
+import os, argparse, json
 from typing import List
 from colorama import init, Fore, Back, Style
 from dotenv import load_dotenv
@@ -7,16 +7,24 @@ from objects.epic import Epic
 from utils.jira_obj import Jira
 from utils.excel_obj import Excel
 import console_util
+from objects.issue_type import IssueType
+from objects.project import Project
+from objects.status import Status
+from objects.calendar_sprint import CalendarSprint
 
 load_dotenv()
 init() # Colorama   
 
-def jira_project_label_reporting(jira, excel, ai_out, date_file_info, path_location, con_out, project_label):
+def jira_project_label_reporting(jira, excel, ai_out, date_file_info, path_location, 
+                                 con_out, project_label, all_reporting_sprints):
     epics: List[Epic] = []  
 
     epics = jira.get_epics()
     jira.get_issues(epics)
     
+    # Place Points into Sprints
+    CalendarSprint.points_in_sprints(epics, all_reporting_sprints)
+
     # Display Console prior to Excel creation
     if con_out:
         jira.output_console(epics)
@@ -24,7 +32,7 @@ def jira_project_label_reporting(jira, excel, ai_out, date_file_info, path_locat
     if ai_out:
         jira.get_comments(epics)
 
-    wb = excel.create_label_excel_report(epics)
+    wb = excel.create_label_excel_report(epics, all_reporting_sprints)
     save_excel_file = date_file_info + " Project " + project_label + " Details.xlsx"
     console_util.save_excel_file(path_location, save_excel_file, wb)
 
@@ -35,18 +43,28 @@ def jira_boards_sprint_reporting(jira, excel, path_location):
     date_file_info = start_time.strftime("%Y_%m_%d")
     #create_date = start_time.strftime("%m/%d/%Y")
 
-
     all_boards = jira.get_boards()
     all_sprints = jira.get_sprints(all_boards)
     all_users = jira.get_users()
     all_projects = jira.get_projects()
 
-    wb = excel.create_jira_info_report(all_boards, all_sprints, all_users)
+    wb = excel.create_jira_info_report(all_boards, all_sprints, all_users, all_projects)
     save_excel_file = date_file_info + " Jira Info.xlsx"
     console_util.save_excel_file(path_location, save_excel_file, wb)
 
 def jira_people_reporting(args):
     print("Getting People Information")
+
+def project_json_load(filelabel):
+    begin_sprint = 97
+    end_sprint = 200
+    json_file = filelabel + ".json"
+    with open(json_file) as f:
+        data = json.load(f)
+    begin_sprint = int(data['start_sprint'])
+    end_sprint = int(data['end_sprint'])
+    return begin_sprint, end_sprint
+
 
 def main(args):
     start_time = datetime.now()
@@ -70,8 +88,14 @@ def main(args):
     if args.ai:
         ai_out = True
 
+    # Generate the reporting sprints from the json file
+    begin_sprint = 97
+    end_sprint = 200
     if args.label:
         project_label = args.label
+        begin_sprint, end_sprint = project_json_load(project_label.lower())
+
+    all_reporting_sprints = CalendarSprint.create_calendar_sprints(begin_sprint, end_sprint)
 
     con_out = False
     if args.console:
@@ -84,7 +108,8 @@ def main(args):
     excel = Excel(claudekey, project_label, jira_issue_link, create_date, ai_out, other_links)
     
     if args.label:
-        jira_project_label_reporting(jira, excel, ai_out, date_file_info, path_location, con_out, project_label)
+        jira_project_label_reporting(jira, excel, ai_out, date_file_info, path_location, 
+                                     con_out, project_label, all_reporting_sprints)
     elif args.info:
         jira_boards_sprint_reporting(jira, excel, path_location)
     elif args.people:

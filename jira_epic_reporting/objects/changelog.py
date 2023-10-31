@@ -89,7 +89,7 @@ class Changelog:
         
     def get_last_time(changelogs, fieldvalue, toItem):
         """
-        Get the first time to dev date
+        Get the last time to dev date
         """
         last_time = None
 
@@ -150,6 +150,24 @@ class Changelog:
             return formatted
         else:
             return 0
+        
+    def get_last_date_point_change(changelogs):
+        """
+        Get the last date the point change occured
+        """
+        last_time = None
+
+        for changelog in changelogs:
+            if changelog.field.lower() == "story points":
+                if last_time is None:
+                    last_time = changelog.created
+                else:
+                    if changelog.created > last_time:
+                        last_time = changelog.created
+        if last_time is not None:                              
+            return datetime.strftime(last_time, "%m/%d/%Y") 
+        else:
+            return ""
 
     def get_total_times(changelogs, fieldvalue, toItem):
         """

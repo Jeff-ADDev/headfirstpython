@@ -5,11 +5,26 @@ from datetime import datetime
 from openpyxl import Workbook
 from openpyxl.worksheet.hyperlink import Hyperlink
 from openpyxl.worksheet.table import Table, TableStyleInfo
-from openpyxl.styles import Font, Alignment, numbers
+from openpyxl.styles import Font, Alignment, numbers, PatternFill, Border, Side, colors, GradientFill
+from openpyxl.drawing.fill import PatternFillProperties, ColorChoice, GradientFillProperties
 from openpyxl.utils import get_column_letter, quote_sheetname
+from openpyxl.chart.shapes import GraphicalProperties
+from openpyxl.drawing.line import LineProperties
+from openpyxl.styles import PatternFill, Border, Side, Alignment, Protection, Font, Color, colors
+from copy import deepcopy
+from openpyxl.drawing.spreadsheet_drawing import TwoCellAnchor
+from openpyxl.styles.fills import Stop
 import console_util
 import utils.claude_util as claude_util
 from utils.jira_obj import Jira
+from objects.project import Project
+from objects.epic import Epic
+from objects.sprint import Sprint
+from objects.user import User
+from objects.board import Board
+from objects.status import Status
+from objects.issue_type import IssueType
+from openpyxl.chart import ScatterChart, Reference, Series, BarChart
 
 class Excel:
     def __init__(self, claudekey, project_label,jira_issue_link, create_date, ai_out, other_links):
@@ -39,7 +54,7 @@ class Excel:
                         epics_with_sub_label.append(epicitem)
         return epics_with_sub_label
 
-    def excel_worksheet_summary(self, ws, epics):
+    def excel_worksheet_summary(self, ws, epics, chart, chart_stories):
 
         sub_labels = self.get_project_sub_labels(epics, self.project_label)
 
@@ -183,6 +198,22 @@ class Excel:
             cell = row[4] # zeor based index
             cell.alignment = Alignment(horizontal="left", vertical="center")
 
+        ws.add_chart(chart, "A12")
+        anchor = TwoCellAnchor()
+        anchor._from.col = 0 # A
+        anchor._from.row = 16 
+        anchor.to.col = 10 # 
+        anchor.to.row = 40 # row 
+        chart.anchor = anchor
+
+        ws.add_chart(chart_stories, "A42")
+        anchor = TwoCellAnchor()
+        anchor._from.col = 0 # A
+        anchor._from.row = 42 
+        anchor.to.col = 10 # 
+        anchor.to.row = 62 # row 
+        chart_stories.anchor = anchor        
+
     def excel_worksheet_create_epics(self, ws, epics):
 
         ws.column_dimensions["A"].width = 16
@@ -252,6 +283,122 @@ class Excel:
         for row in ws[1:ws.max_row]:  # Include The Header
             cell = row[6] # zeor based index
             cell.alignment = Alignment(horizontal="center", vertical="center")
+
+    def excel_worksheet_story_add(self, ws, all_sprints):
+        """
+            Create the Story Add Chart
+        """
+        # First create the data to use
+        ws.column_dimensions["A"].width = 18 # Sprint Number
+        ws.column_dimensions["B"].width = 18 # Total Stories
+
+
+        table = Table(displayName="TableStories", ref="A1:B" + str(len(all_sprints) + 1))
+        style = TableStyleInfo(name="TableStyleMedium9", showFirstColumn=False,
+                            showLastColumn=False, showRowStripes=True, showColumnStripes=False)
+        table.tableStyleInfo = style
+
+        # Populate data
+        ws.append(["Sprint", "Stories Added"])
+        for sprintitem in all_sprints:
+            ws.append([sprintitem.name, sprintitem.stories_created])
+        ws.add_table(table)
+
+        chart = BarChart()
+        chart.title = "Stories Added By Sprint"
+        chart.type = "col"
+        chart.style = 10
+        chart.x_axis.title = 'Sprints'
+        chart.y_axis.title = 'Count'
+        max_row_set = ws.max_row
+        
+        data = Reference(ws, min_col=2, min_row=1, max_row=max_row_set, max_col=2)
+        cats = Reference(ws, min_col=1, min_row=2, max_row=max_row_set)
+        chart.add_data(data, titles_from_data=True)
+        chart.set_categories(cats)
+        chart.shape = 4 
+
+        chart2 = deepcopy(chart)
+
+        ws.add_chart(chart, "F2")
+        anchor = TwoCellAnchor()
+        anchor._from.col = 5 # F
+        anchor._from.row = 2 # row 19, using 0-based indexing
+        anchor.to.col = 20 # 
+        anchor.to.row = 25 # row 
+        chart.anchor = anchor        
+
+        return chart2
+
+    def excel_worksheet_burnup(self, ws, all_sprints):
+        """
+            Create the burnup chart
+        """
+        # First create the data to use
+        ws.column_dimensions["A"].width = 18 # Sprint Number
+        ws.column_dimensions["B"].width = 18 # Sprint Created Accum Points
+        ws.column_dimensions["C"].width = 18 # Sprint Completed Accum Points
+        ws.column_dimensions["D"].width = 18 # Trajectory
+
+        table = Table(displayName="TableBurnup", ref="A1:D" + str(len(all_sprints) + 1))
+        style = TableStyleInfo(name="TableStyleMedium9", showFirstColumn=False,
+                            showLastColumn=False, showRowStripes=True, showColumnStripes=False)
+        table.tableStyleInfo = style
+
+        # Populate data
+        ws.append(["Sprint", "Accum Pointed", "Accum Completed", "Trajectory"])
+        accum_points = 0
+        accum_completed = 0
+        location = 0
+        for sprintitem in all_sprints:
+            accum_points += sprintitem.story_points_created
+            accum_completed += sprintitem.story_points_completed
+            if location == 0:
+                ws.append([sprintitem.name, accum_points, accum_completed, 0])
+            elif (location +1) == len(all_sprints):
+                ws.append([sprintitem.name, accum_points, accum_completed, accum_points])
+            else:
+                ws.append([sprintitem.name, accum_points, accum_completed, "=NA()"])
+            location += 1
+        ws.add_table(table)
+
+        chart = ScatterChart()
+        chart.title = "Burn Up Chart"
+        chart.style = 6
+        chart.x_axis.title = 'Sprints'
+        chart.y_axis.title = 'Points'
+        max_row_set = ws.max_row
+        xvalues = Reference(ws, min_col=1, min_row=2, max_row=max_row_set) # Size Column
+
+        for i in range(2, 5): # Column (2, 5) 2,3,4: B and C and D
+            values = Reference(ws, min_col=i, min_row=1, max_row=max_row_set)
+            series = Series(values, xvalues, title_from_data=True)
+            chart.series.append(series) 
+
+        # Chart Line Properties
+        series2 = chart.series[2]
+        line_props = LineProperties(solidFill="ABFA96", prstDash="dash")
+        series2.graphicalProperties.line = line_props
+
+        series0 = chart.series[0]
+        line_props0 = LineProperties(solidFill="04A24E", prstDash="solid")
+        series0.graphicalProperties.line = line_props0
+
+        series1 = chart.series[1]
+        line_props1 = LineProperties(solidFill="FF0000", prstDash="dot")
+        series1.graphicalProperties.line = line_props1
+
+        chart2 = deepcopy(chart)
+
+        ws.add_chart(chart, "F2")
+        anchor = TwoCellAnchor()
+        anchor._from.col = 5 # F
+        anchor._from.row = 2 # row 19, using 0-based indexing
+        anchor.to.col = 20 # 
+        anchor.to.row = 48 # row 
+        chart.anchor = anchor
+
+        return chart2
 
     def excel_worksheet_create_issues(self, ws, epics, table_name):
         def set_date(value):
@@ -377,17 +524,24 @@ class Excel:
             cell = row[11] # zeor based index
             cell.alignment = Alignment(horizontal="center", vertical="center")
 
-    def create_label_excel_report(self, epics):
+    def create_label_excel_report(self, epics, all_sprints):
         console_util.terminal_update("Creating Excel Document", " - ", False)
         workbook = Workbook()
         worksheet_summary = workbook.active
         worksheet_summary.title = "Summary"
+        worksheet_burnup = workbook.create_sheet("Burnup")
+        worksheet_story_add = workbook.create_sheet("Story Add")
         worksheet_epics = workbook.create_sheet("All Epics")
         worksheet_issues = workbook.create_sheet("All Issues")
         
+        # Create the burnup chart worksheet
+        chart_copy = self.excel_worksheet_burnup(worksheet_burnup, all_sprints)
 
+        # Create Story Add Chart
+        chart_stories = self.excel_worksheet_story_add(worksheet_story_add, all_sprints)
+        
         # Create the Summary Tab
-        self.excel_worksheet_summary(worksheet_summary, epics)
+        self.excel_worksheet_summary(worksheet_summary, epics, chart_copy, chart_stories)
 
         # Create the Epic Tab
         self.excel_worksheet_create_epics(worksheet_epics, epics)
@@ -409,16 +563,18 @@ class Excel:
 
         return workbook
 
-    def create_jira_info_report(self, boards, sprints, users):
+    def create_jira_info_report(self, boards, sprints, users, projects):
         console_util.terminal_update("Creating Jira Excel Document", " - ", False)
         workbook = Workbook()
         worksheet_boards = workbook.active
         worksheet_boards.title = "Boards"
         worksheet_sprints = workbook.create_sheet("All Sprints")
+        worksheet_statuses = workbook.create_sheet("All Statuses")
         worksheet_users = workbook.create_sheet("Users")
         self.excel_boards(worksheet_boards, boards)
         self.excel_sprints(worksheet_sprints, sprints)
-        self.excel_users(worksheet_users, users)
+        self.excel_statuses(worksheet_statuses, projects)
+        self.excel_users(worksheet_users, users)    
         return workbook
 
     def excel_boards(self, ws, boards):
@@ -482,6 +638,39 @@ class Excel:
         for row in ws[1:ws.max_row]:  # Include The Header
             cell = row[3] # zeor based index
             cell.alignment = Alignment(horizontal="center", vertical="center")
+
+    def excel_statuses(self, ws, projects):
+        """
+        List all statuses with the projects
+        """
+        ws.column_dimensions["A"].width = 18 # Project ID
+        ws.column_dimensions["B"].width = 15 # Project Key
+        ws.column_dimensions["C"].width = 30 # Project Name
+        ws.column_dimensions["D"].width = 18 # Type ID
+        ws.column_dimensions["E"].width = 30 # Type Name
+        ws.column_dimensions["F"].width = 18 # Status ID
+        ws.column_dimensions["G"].width = 35 # Status Name
+        ws.column_dimensions["H"].width = 70 # Status Description
+
+        ws.append(["Proj ID", "Project Key", "Proj Name", "Type ID", "Type Name", "Status ID", "Status Name", "Status Description"])
+
+        total_length = 1
+        for project in projects:
+            for issue in project.issues:
+                for status in issue.statuses:
+                    total_length += 1
+
+        table = Table(displayName="TableStatuses", ref="A1:H" + str(total_length))
+        style = TableStyleInfo(name="TableStyleMedium9", showFirstColumn=False,
+                            showLastColumn=False, showRowStripes=True, showColumnStripes=False)
+        table.tableStyleInfo = style
+
+        for project in projects:
+            for issue in project.issues:
+                for status in issue.statuses:
+                    ws.append([project.id, project.key, project.name, issue.id, issue.name, status.id, status.name, status.description])
+
+        ws.add_table(table)
 
     def excel_users(self, ws, users):
         ws.column_dimensions["A"].width = 25

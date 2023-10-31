@@ -8,17 +8,15 @@ from openpyxl.styles import Alignment
 from openpyxl.utils import get_column_letter
 from objects.changelog import Changelog
 from objects.status import Status
-from objects.issue_type import IssueType
 
-class Project:
-    def __init__(self, id, key, name):
+class IssueType:
+    def __init__(self, id, name):
         self.id = id
-        self.key = key
         self.name = name
-        self.issues: List[IssueType] = []
+        self.statuses: List[Status] = []
 
-    def add_issue(self, issue):
-        self.issues.append(issue)
+    def add_status(self, status):
+        self.statuses.append(status)
     
-    def add_issues(self, issues):
-        self.issues = issues
+    def add_statuses(self, statuses):
+        self.statuses = statuses

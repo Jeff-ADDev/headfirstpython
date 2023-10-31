@@ -8,6 +8,9 @@ from objects.user import User
 from objects.changelog import Changelog
 import console_util
 from objects.epic import Epic
+from objects.status import Status
+from objects.issue_type import IssueType
+from objects.project import Project
 
 class Jira:
     def __init__(self, project_label, jirakey, url_location, url_search, url_board, url_issue, url_users, header, con_out):
@@ -325,6 +328,8 @@ class Jira:
             issue.set_hours_in_uat(Changelog.get_total_hours(changelogs, "status", "UAT", "Done"))
             issue.set_total_hours(Changelog.get_total_hours(changelogs, "status", "In Development", "Done"))
 
+            issue.set_last_pointchange_date(Changelog.get_last_date_point_change(changelogs))
+
             total_days = 0
             if float(issue.total_hours) > 0: 
                 days = float(issue.total_hours) / 8
@@ -338,15 +343,34 @@ class Jira:
         """
         Get all projects in Jira and the Status Codes
         """
+        count = 0
         console_util.terminal_update("Retrieving Projects", " - ", False)
         temp_projects = []
         project_info = f"{self.url_location}/rest/api/2/project"
         response = requests.get(project_info, headers=self.header)
         if response.status_code == 200:
-            data = response.json()
+            data = response.json()            
             for project in data:
+                console_util.terminal_busy("Retrieving Statuses", count)
+                count += 1
+                if count > 3:
+                    count = 0                
+                temp_project = Project(project['id'], project['key'], project['name'])
+                temp_projects.append(temp_project)
+#                print(f"ID - {project['id']} - Key - {project['key']} - Name - {project['name']}")
                 status_info = f"{self.url_location}/rest/api/2/project/{project['id']}/statuses"
-                if response.status_code == 200:
-                    print(f"ID - {project['id']} - Key - {project['key']} - Name - {project['name']}")
+                response_status = requests.get(status_info, headers=self.header)
+                if response_status.status_code == 200:
+                    status_data = response_status.json()
+                    temp_types = []
+                    for type in status_data:
+                        temp_issue = IssueType(type['id'], type['name'])
+                        temp_types.append(temp_issue)
+                        temp_status = []
+                        for statuses in type['statuses']:                       
+#                            print(f"     {type['name']} - {statuses['name']} | {statuses['description']}")
+                            temp_status.append(Status(statuses['id'], statuses['name'], statuses['description']))
+                        temp_issue.add_statuses(temp_status)
+                temp_project.add_issues(temp_types)                           
 
         return temp_projects

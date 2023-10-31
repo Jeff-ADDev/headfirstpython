@@ -3,19 +3,30 @@
 
 ## Command Line For Project Report
 
-ReviewMarketing Label with Console Output and Links in review_marketing.txt
+### ReviewMarketing Label with Console Output and Links in review_marketing.txt
 
 ```
 python3 project_report.py --label ReviewMarketing --console --file review_marketing.txt
 ```
 
-ReviewMarketing Label with Console Output and Links in review_marketing.txt and create ai review tab
+reviewmarketing.json will be a control file that contains
+- Sprint Start Date
+- Sprint End Date
+
+```
+{
+    "start_sprint": "155",
+    "end_sprint": "160"
+}
+```
+
+### ReviewMarketing Label with Console Output and Links in review_marketing.txt and create ai review tab
 
 ```
 python3 project_report.py --label ReviewMarketing --console --file review_marketing.txt --ai
 ```
 
-Trail Project Label 
+### Trail Project Label 
 
 ```
 python3 project_report.py --label ReportTrial --console --file review_marketing.txt
@@ -54,19 +65,38 @@ JIRA_ISSUE_LINK=https://revlocaldev.atlassian.net/browse/
 
 ### Install Items for reporting
 
-Excel
+### Excel
 openpyxl
 
-Console Color Ouput
+### Console Color Ouput
 colorama
 
-Environment Variables
+### Environment Variables
 dotenv
 
-Object Typing
+### Object Typing
 typing
 
-Claude Usage
+### Claude Usage
 anthropic
 
-PDF Creation
+### PDF Creation
+
+### Chart Creation
+
+[Scatter Chart](https://stackoverflow.com/questions/63696835/python-openpyxl-scatter-plots-with-secondary-y-axis)
+
+### Chart Background
+
+[Chart Background](https://www.youtube.com/watch?v=osFd-8B146w)
+
+### Fill Gradient
+
+[fills](https://openpyxl.readthedocs.io/en/stable/api/openpyxl.styles.fills.html)
+
+### Cell Formatting Examples
+[Cell Formatting](https://www.blog.pythonlibrary.org/2021/08/11/styling-excel-cells-with-openpyxl-and-python/)
+
+### HTML Color Code Selector
+
+[Color Code Selector](https://www.rapidtables.com)
